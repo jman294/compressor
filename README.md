@@ -1,2 +1,2 @@
-# ans-compression
-Messing around with ANS compression
+# compression
+Messing around with compression
