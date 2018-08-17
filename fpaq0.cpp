@@ -82,6 +82,7 @@ Encoder::Encoder(Mode m, FILE* f): predictor(), mode(m), archive(f), x1(0),
       x=(x<<8)+(c&0xff);
     }
   }
+  printf("%ld\n", x);
 }
 
 /* encode(y) -- Encode bit y by splitting the range [x1, x2] in proportion
