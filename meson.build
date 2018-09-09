@@ -1,0 +1,30 @@
+project('compressor', 'c')
+
+sources = [
+  'src/impl/compressor.c',
+]
+
+headers = [
+  'src/include/packingtape/compressor.h'
+]
+
+install_headers(
+  headers,
+  subdir: 'packingtape'
+)
+
+lib_inc = include_directories('src/include/packingtape')
+
+lib = library('packingtape',
+  sources: [
+    sources,
+    headers
+  ],
+  soversion: 20,
+  install: true,
+  include_directories: lib_inc
+)
+
+exe_inc = include_directories('src/include')
+
+executable('packingtape', 'src/main.c', link_with : lib, include_directories: exe_inc)
