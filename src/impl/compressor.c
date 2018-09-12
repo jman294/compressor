@@ -1,5 +1,5 @@
 #include "compressor.h"
+#include "compressorpredictor.h"
 
-int farts () {
-  return 5;
+void compress (FILE* input, FILE* output, CompressorPredictor* p) {
 }

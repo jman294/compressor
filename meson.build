@@ -5,7 +5,8 @@ sources = [
 ]
 
 headers = [
-  'src/include/packingtape/compressor.h'
+  'src/include/packingtape/compressor.h',
+  'src/include/packingtape/compressorpredictor.h',
 ]
 
 install_headers(
