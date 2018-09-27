@@ -39,18 +39,17 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   uint32 x1 = 0;
   uint32 x2 = 0xffffffff;
 
-  int cxt;  // Context: last 0-8 bits with a leading 1
   int ct[512][2];  // 0 and 1 counts in context cxt
   memset(ct, 0, sizeof(ct));
 
   int c;
 
   while ((c=getc(input))!=EOF) {
-    encode(&x1, &x2, 0, output, prediction(cxt, ct));
+    encode(&x1, &x2, 0, output, CP_Predict(p));
     for (int i=7; i>=0; --i)
-      encode(&x1, &x2, (c>>i)&1, output, prediction(cxt, ct));
+      encode(&x1, &x2, (c>>i)&1, output, CP_Predict(p));
   }
-  encode(&x1, &x2, 1, output, prediction(cxt, ct));  // EOF code
+  encode(&x1, &x2, 1, output, CP_Predict(p));  // EOF code
   flush(&x1, &x2, output);
 
   fclose(output);

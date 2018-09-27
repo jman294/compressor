@@ -2,6 +2,7 @@ project('compressor', 'c')
 
 sources = [
   'src/impl/compressor.c',
+  'src/impl/compressorpredictor.c',
 ]
 
 headers = [
