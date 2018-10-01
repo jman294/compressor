@@ -5,8 +5,6 @@
 
 #include "decompressorpredictor.h"
 
-typedef unsigned long uint32;
-
 void decompress(FILE* input, FILE* output, DecompressorPredictor* p);
 
 #endif // DECOMPRESSOR_H_

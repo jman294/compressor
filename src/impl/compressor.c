@@ -4,10 +4,7 @@
 
 #include "compressor.h"
 #include "compressorpredictor.h"
-
-int prediction (int cxt, int ct[512][2]) {
-  return 4096*(ct[cxt][1]+1)/(ct[cxt][0]+ct[cxt][1]+2);
-}
+#include "util.h"
 
 void encode (uint32* x1, uint32* x2, int y, FILE* archive, int prediction) {
   // Update the range
@@ -24,15 +21,6 @@ void encode (uint32* x1, uint32* x2, int y, FILE* archive, int prediction) {
     *x1<<=8;
     *x2=(*x2<<8)+255;
   }
-}
-
-void flush (uint32* x1, uint32* x2, FILE* archive) {
-  while (((*x1^*x2)&0xff000000)==0) {
-    putc(*x2>>24, archive);
-    *x1<<=8;
-    *x2=(*x2<<8)+255;
-  }
-  putc(*x2>>24, archive);  // First unequal byte
 }
 
 void compress (FILE* input, FILE* output, CompressorPredictor* p) {

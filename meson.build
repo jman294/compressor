@@ -4,10 +4,16 @@ sources = [
   'src/impl/model.c',
   'src/impl/compressor.c',
   'src/impl/compressorpredictor.c',
+  'src/impl/decompressor.c',
+  'src/impl/decompressorpredictor.c',
+  'src/impl/util.c',
 ]
 
 headers = [
   'src/include/packingtape/model.h',
+  'src/include/packingtape/util.h',
+  'src/include/packingtape/decompressor.h',
+  'src/include/packingtape/decompressorpredictor.h',
   'src/include/packingtape/compressor.h',
   'src/include/packingtape/compressorpredictor.h',
 ]

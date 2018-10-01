@@ -2,12 +2,9 @@
 #include <string.h>
 #include <assert.h>
 
+#include "util.h"
 #include "decompressor.h"
 #include "decompressorpredictor.h"
-
-int prediction (int cxt, int ct[512][2]) {
-  return 4096*(ct[cxt][1]+1)/(ct[cxt][0]+ct[cxt][1]+2);
-}
 
 int decode (uint32* x1, uint32* x2, uint32* x, int prediction, FILE* archive) {
 
@@ -33,16 +30,7 @@ int decode (uint32* x1, uint32* x2, uint32* x, int prediction, FILE* archive) {
   return y;
 }
 
-void flush (uint32* x1, uint32* x2, FILE* archive) {
-  while (((*x1^*x2)&0xff000000)==0) {
-    putc(*x2>>24, archive);
-    *x1<<=8;
-    *x2=(*x2<<8)+255;
-  }
-  putc(*x2>>24, archive);  // First unequal byte
-}
-
-void decompress(FILE* input, FILE* output, DecompressorPredictor* p) {
+void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   uint32 x1 = 0;
   uint32 x2 = 0xffffffff;
   uint32 x = 0;
@@ -57,10 +45,10 @@ void decompress(FILE* input, FILE* output, DecompressorPredictor* p) {
     x=(x<<8)+(c&0xff);
   }
 
-  while (!decode(&x1, &x2, &x, prediction(cxt, ct), input)) {
+  while (!decode(&x1, &x2, &x, DP_Predict(p), input)) {
     int c=1;
     while (c<256)
-      c+=c+decode(&x1, &x2, &x, prediction(cxt, ct), input);
+      c+=c+decode(&x1, &x2, &x, DP_Predict(p), input);
     putc(c-256, output);
   }
 
