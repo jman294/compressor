@@ -36,3 +36,10 @@
 build/*
 
 torch-rnn
+
+.undodir/
+Session.vim
+
+*.swp
+*.swo
+
