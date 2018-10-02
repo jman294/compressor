@@ -1,9 +1,9 @@
-#include "model.h"
+/*#include "model.h"*/
 
-void MO_New (Model * m) {
-  m->predictions = int[65336];
-}
+/*void MO_New (Model * m) {*/
+  /*m->predictions = int[65336];*/
+/*}*/
 
-int MO_GetPrediction (Model * m, int context) {
-  return m->predictions[context];
-}
+/*int MO_GetPrediction (Model * m, int context) {*/
+  /*return m->predictions[context];*/
+/*}*/
