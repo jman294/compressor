@@ -1,12 +1,11 @@
-//#ifndef MODEL_H_   [> Include guard <]
-//#define MODEL_H_
+#ifndef MODEL_H_   /* Include guard */
+#define MODEL_H_
 
-//typedef struct Model {
-  //int[] predictions;
-//} Model;
+typedef struct Model {
+} Model;
 
-//void MO_New (Model * m);
+void MO_New (Model * m);
 
-//int MO_GetPrediction (Model * m);
+int MO_GetPrediction (Model * m, int context);
 
-//#endif // MODEL_H_
+#endif // MODEL_H_
