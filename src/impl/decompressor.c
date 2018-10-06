@@ -35,7 +35,6 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   uint32 x2 = 0xffffffff;
   uint32 x = 0;
 
-  int cxt;  // Context: last 0-8 bits with a leading 1
   int ct[512][2];  // 0 and 1 counts in context cxt
   memset(ct, 0, sizeof(ct));
 
