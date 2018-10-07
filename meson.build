@@ -41,7 +41,8 @@ executable('packingtape', 'src/main.c', link_with: lib, include_directories: exe
 
 # Testing
 test_sources = [
-  'compressorpredictor'
+  'compressorpredictor',
+  'model'
 ]
 
 foreach t: test_sources
@@ -50,7 +51,7 @@ foreach t: test_sources
       'test/' + t + '.spec.c',
       include_directories: [
         lib_inc,
-        include_directories('test/include')
+        include_directories('test/include') # acutest header
       ],
       link_with: lib,
   )
