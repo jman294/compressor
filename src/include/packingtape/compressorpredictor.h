@@ -1,14 +1,15 @@
 #ifndef COMPRESSORPREDICTOR_H_   /* Include guard */
 #define COMPRESSORPREDICTOR_H_
 
+#include "util.h"
 #include "model.h"
 
 typedef struct CompressorPredictor {
-  int ctx;
+  context ctx;
   Model models[2];
 } CompressorPredictor;
 
-void CP_New (CompressorPredictor * cp, Model models[2]);
+void CP_New (CompressorPredictor * cp, Model models[2], context ctx);
 
 int CP_Predict (CompressorPredictor * cp);
 

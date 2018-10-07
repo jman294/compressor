@@ -2,10 +2,12 @@
 #define UTIL_H_
 
 #include <stdio.h>
+#include <stdint.h>
 
-typedef unsigned long uint32;
+typedef uint32_t uint32;
 
-int prediction (int cxt, int ct[512][2]);
+// 32 Bit Context
+typedef uint32_t context;
 
 void flush (uint32* x1, uint32* x2, FILE* archive);
 

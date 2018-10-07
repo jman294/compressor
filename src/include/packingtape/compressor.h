@@ -5,8 +5,6 @@
 
 #include "compressorpredictor.h"
 
-typedef unsigned long uint32;
-
 void compress(FILE* input, FILE* output, CompressorPredictor* p);
 
 #endif // COMPRESSOR_H_
