@@ -5,17 +5,28 @@
 #include "packingtape/decompressor.h"
 #include "packingtape/decompressorpredictor.h"
 
-int main () {
-  /*FILE* input = fopen("../LICENSE", "rb");*/
-  /*FILE* output = fopen("../output/LICENSE.packingtape", "w");*/
-  /*CompressorPredictor* p = malloc(sizeof(*p));*/
-  /*CP_New(p, NULL);*/
-  /*compress(input, output, p);*/
+int main (int argc, char ** argv) {
+  // Chech arguments: packingtape c/d input output
+  if (argc!=4 || (argv[1][0]!='c' && argv[1][0]!='d')) {
+    printf("To compress:   packingtape c input output\n"
+           "To decompress: packingtape d input output\n");
+    exit(1);
+  }
 
-  /*FILE* ninput = fopen("../output/LICENSE.packingtape", "rb");*/
-  /*FILE* noutput = fopen("../output/LICENSE.original", "w");*/
-  /*DecompressorPredictor* pnew = malloc(sizeof(*pnew));*/
-  /**pnew = (DecompressorPredictor) {};*/
-  /*DP_New(pnew);*/
-  /*decompress(ninput, noutput, pnew);*/
+  // Open files
+  FILE *input=fopen(argv[2], "rb");
+  if (!input) perror(argv[2]), exit(1);
+  FILE *output=fopen(argv[3], "wb");
+  if (!output) perror(argv[3]), exit(1);
+
+  if (argv[1][0] == 'c') {
+    CompressorPredictor* p = malloc(sizeof(*p));
+    CP_New(p, NULL, 0); // New CP with context 0
+    compress(input, output, p);
+  } else if (argv[1][0] == 'd') {
+    DecompressorPredictor* pnew = malloc(sizeof(*pnew));
+    *pnew = (DecompressorPredictor) {};
+    DP_New(pnew);
+    decompress(input, output, pnew);
+  }
 }

@@ -10,6 +10,7 @@ sources = [
     ]
 
 headers = [
+    'src/include/packingtape/modelenum.h',
     'src/include/packingtape/model.h',
     'src/include/packingtape/util.h',
     'src/include/packingtape/decompressor.h',
