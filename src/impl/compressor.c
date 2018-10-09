@@ -27,15 +27,32 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   uint32 x1 = 0;
   uint32 x2 = 0xffffffff;
 
-  int ct[512][2];  // 0 and 1 counts in context cxt
-  memset(ct, 0, sizeof(ct));
+  short changeInterval = 128; // Every 128 bytes, we change models
 
   int c;
+  int byteCounter = 0;
+  long lastPos = 1;
+
+  /*************************/
+  /* WRITE COMPRESSED BYTE */
+  /*         V             */
+  /* INCREASE BYTE COUNTER */
+  /*         V             */
+  /*  WRITE MODEL BYTE IF  */
+  /*  PASSED ENOUGH BYTES  */
+  /*************************/
 
   while ((c=getc(input))!=EOF) {
+    lastPos = ftell(output);
     encode(&x1, &x2, 0, output, CP_Predict(p));
     for (int i=7; i>=0; --i)
       encode(&x1, &x2, (c>>i)&1, output, CP_Predict(p));
+    byteCounter += ftell(output)-lastPos;
+    if (byteCounter >= changeInterval) {
+      printf("%d %ld\n", CP_GetBestModel(p)->code, ftell(output));
+      byteCounter = 0;
+      putc(CP_GetBestModel(p)->code, output);
+    }
   }
   encode(&x1, &x2, 1, output, CP_Predict(p));  // EOF code
   flush(&x1, &x2, output);

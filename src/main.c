@@ -21,12 +21,11 @@ int main (int argc, char ** argv) {
 
   if (argv[1][0] == 'c') {
     CompressorPredictor* p = malloc(sizeof(*p));
-    CP_New(p, NULL, 0); // New CP with context 0
+    *p = (CompressorPredictor) {};
     compress(input, output, p);
   } else if (argv[1][0] == 'd') {
-    DecompressorPredictor* pnew = malloc(sizeof(*pnew));
-    *pnew = (DecompressorPredictor) {};
-    DP_New(pnew);
-    decompress(input, output, pnew);
+    DecompressorPredictor* p = malloc(sizeof(*p));
+    *p = (DecompressorPredictor) {};
+    decompress(input, output, p);
   }
 }

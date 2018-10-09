@@ -43,7 +43,8 @@ executable('packingtape', 'src/main.c', link_with: lib, include_directories: exe
 # Testing
 test_sources = [
   'compressorpredictor',
-  'model'
+  'model',
+  'compressor',
 ]
 
 foreach t: test_sources
