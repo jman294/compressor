@@ -6,8 +6,7 @@
 #include "decompressor.h"
 #include "decompressorpredictor.h"
 
-int decode (uint32* x1, uint32* x2, uint32* x, int prediction, FILE* archive, int* readDiff) {
-  int iPos = ftell(archive);
+int decode (uint32* x1, uint32* x2, uint32* x, int prediction, FILE* archive, short changeInterval) {
   // Update the range
   const uint32 xmid = (*x1) + (((*x2)-(*x1)) >> 12) * prediction;
   assert(xmid >= (*x1) && xmid < (*x2));
@@ -24,10 +23,13 @@ int decode (uint32* x1, uint32* x2, uint32* x, int prediction, FILE* archive, in
     (*x1)<<=8;
     (*x2)=((*x2)<<8)+255;
     int c=getc(archive);
+    if (ftell(archive) % changeInterval == 0) {
+      printf("%ld\n", ftell(archive));
+      getc(archive);
+    }
     if (c==EOF) c=0;
     (*x)=((*x)<<8)+c;
   }
-  *readDiff += ftell(archive) - iPos;
   return y;
 }
 
@@ -36,9 +38,6 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   uint32 x2 = 0xffffffff;
   uint32 x = 0;
 
-  int byteCounter = 0;
-  int changeInterval = 128; // Has to be synced with compressor's change interval
-
   // Reads in first 4 bytes into x
   for (int i=0; i<4; ++i) {
     int c=getc(input);
@@ -46,16 +45,14 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
     x=(x<<8)+(c&0xff);
   }
 
-  while (!decode(&x1, &x2, &x, DP_Predict(p), input, &byteCounter)) {
+  int changeInterval = 128; // Has to be synced with compressor's change interval
+
+  while (!decode(&x1, &x2, &x, DP_Predict(p), input, changeInterval)) {
     int c=1;
     while (c<256) {
-      c+=c+decode(&x1, &x2, &x, DP_Predict(p), input, &byteCounter);
+      c+=c+decode(&x1, &x2, &x, DP_Predict(p), input, changeInterval);
     }
     putc(c-256, output);
-    if (byteCounter >= changeInterval) {
-      printf("%d %ld\n", byteCounter, ftell(input));
-      byteCounter = 0;
-    }
   }
 
   fclose(input);

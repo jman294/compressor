@@ -6,7 +6,7 @@
 #include "compressorpredictor.h"
 #include "util.h"
 
-void encode (uint32* x1, uint32* x2, int y, FILE* archive, int prediction) {
+void encode (uint32* x1, uint32* x2, int y, FILE* archive, int prediction, short changeInterval, int code) {
   // Update the range
   const uint32 xmid = *x1 + ((*x2-*x1) >> 12) * prediction;
   assert(xmid >= *x1 && xmid < *x2);
@@ -18,6 +18,10 @@ void encode (uint32* x1, uint32* x2, int y, FILE* archive, int prediction) {
   // Shift equal MSB's out
   while (((*x1^*x2)&0xff000000)==0) {
     putc(*x2>>24, archive);
+    if (ftell(archive) % changeInterval == 0) {
+      printf("%ld\n", ftell(archive));
+      putc(code, archive);
+    }
     *x1<<=8;
     *x2=(*x2<<8)+255;
   }
@@ -30,31 +34,15 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   short changeInterval = 128; // Every 128 bytes, we change models
 
   int c;
-  int byteCounter = 0;
-  long lastPos = 1;
 
-  /*************************/
-  /* WRITE COMPRESSED BYTE */
-  /*         V             */
-  /* INCREASE BYTE COUNTER */
-  /*         V             */
-  /*  WRITE MODEL BYTE IF  */
-  /*  PASSED ENOUGH BYTES  */
-  /*************************/
-
+  int code = CP_GetBestModel(p)->code;
   while ((c=getc(input))!=EOF) {
-    lastPos = ftell(output);
-    encode(&x1, &x2, 0, output, CP_Predict(p));
+    code = CP_GetBestModel(p)->code;
+    encode(&x1, &x2, 0, output, CP_Predict(p), changeInterval, code);
     for (int i=7; i>=0; --i)
-      encode(&x1, &x2, (c>>i)&1, output, CP_Predict(p));
-    byteCounter += ftell(output)-lastPos;
-    if (byteCounter >= changeInterval) {
-      printf("%d %ld\n", CP_GetBestModel(p)->code, ftell(output));
-      byteCounter = 0;
-      putc(CP_GetBestModel(p)->code, output);
-    }
+      encode(&x1, &x2, (c>>i)&1, output, CP_Predict(p), changeInterval, code);
   }
-  encode(&x1, &x2, 1, output, CP_Predict(p));  // EOF code
+  encode(&x1, &x2, 1, output, CP_Predict(p), changeInterval, code);  // EOF code
   flush(&x1, &x2, output);
 
   fclose(output);
