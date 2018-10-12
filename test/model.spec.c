@@ -5,7 +5,7 @@
 
 void test_new (void) {
   Model * m = malloc(sizeof(Model));
-  MO_New(m, TEXT1);
+  MO_New(m, TEXT1, TEXT1_Data);
   TEST_CHECK(m->code == 0);
 }
 
