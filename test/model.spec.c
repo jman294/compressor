@@ -33,7 +33,6 @@ void test_enumerate_models (void) {
     printf("%d %d\n", (*mos1)[i]->code, (*mos2)[i]->code);
     TEST_CHECK((*mos1)[i]->code == (*mos2)[i]->code);
   }
-  TEST_CHECK(1 == 1);
 }
 
 
