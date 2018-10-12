@@ -5,7 +5,7 @@
 
 void test_new (void) {
   Model * m = malloc(sizeof(Model));
-  MO_New(m, TEXT1, TEXT1_Data);
+  MO_New(m, TEXT1);
   TEST_CHECK(m->code == 0);
 }
 
@@ -30,7 +30,6 @@ void test_enumerate_models (void) {
   S_MO_EnumerateAllModels(mos2);
 
   for (int i = 0; i < sizeof(*mos1)/sizeof((*mos1)[0]); i++) {
-    printf("%d %d\n", (*mos1)[i]->code, (*mos2)[i]->code);
     TEST_CHECK((*mos1)[i]->code == (*mos2)[i]->code);
   }
 }

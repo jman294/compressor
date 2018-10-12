@@ -5,6 +5,7 @@
 
 typedef struct Model {
   int code;
+  int data;
 } Model;
 
 void S_MO_EnumerateAllModels (Model * (*mos)[2]); // A pointer to an array that contains pointers to Models

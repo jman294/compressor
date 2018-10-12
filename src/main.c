@@ -22,10 +22,12 @@ int main (int argc, char ** argv) {
   if (argv[1][0] == 'c') {
     CompressorPredictor* p = malloc(sizeof(*p));
     *p = (CompressorPredictor) {};
+    CP_New(p);
     compress(input, output, p);
   } else if (argv[1][0] == 'd') {
     DecompressorPredictor* p = malloc(sizeof(*p));
     *p = (DecompressorPredictor) {};
+    DP_New(p);
     decompress(input, output, p);
   }
 }
