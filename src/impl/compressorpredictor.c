@@ -2,9 +2,10 @@
 
 #include "util.h"
 #include "compressorpredictor.h"
+#include "model.h"
 #include "modelenum.h"
 
-void CP_New (CompressorPredictor * cp, Model models[2], context ctx) {
+void CP_New (CompressorPredictor * cp, ModelArray_t mos, context ctx) {
   cp->ctx = ctx;
 }
 

@@ -1,7 +1,7 @@
 #include "decompressorpredictor.h"
 #include "model.h"
 
-void DP_New (DecompressorPredictor * dp) {
+void DP_New (DecompressorPredictor * dp, ModelArray_t mos, context ctx) {
   dp->ctx = 2000;
 }
 

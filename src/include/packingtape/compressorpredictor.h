@@ -9,7 +9,7 @@ typedef struct CompressorPredictor {
   Model models[2];
 } CompressorPredictor;
 
-void CP_New (CompressorPredictor * cp, Model models[2], context ctx);
+void CP_New (CompressorPredictor * cp, ModelArray_t mos, context ctx);
 
 int CP_Predict (CompressorPredictor * cp);
 

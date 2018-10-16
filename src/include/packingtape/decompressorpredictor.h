@@ -7,7 +7,7 @@ typedef struct DecompressorPredictor {
   int ctx;
 } DecompressorPredictor;
 
-void DP_New (DecompressorPredictor * dp);
+void DP_New (DecompressorPredictor * dp, ModelArray_t mos, context ctx);
 
 int DP_Predict (DecompressorPredictor * dp);
 
