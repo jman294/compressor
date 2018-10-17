@@ -5,7 +5,6 @@
 #include "modelenum.h"
 
 void test_new (void) {
-  //TEST NEW HERE
   DecompressorPredictor *p = malloc(sizeof(*p));
   ModelArray_t mos = malloc(sizeof(mos));
   S_MO_EnumerateAllModels(mos);
@@ -14,8 +13,11 @@ void test_new (void) {
 
 void test_select (void) {
   DecompressorPredictor *p = malloc(sizeof(*p));
-  /*DP_New(p);*/
-  /*TEST_CHECK(p->code == TEXT1);*/
+  DP_New(p, NULL, 0);
+  Model * m = malloc(sizeof(*m));
+  MO_New(m, TEXT1);
+  DP_SelectModel(p, m);
+  TEST_CHECK(p->m->code == m->code);
 }
 
 TEST_LIST = {
