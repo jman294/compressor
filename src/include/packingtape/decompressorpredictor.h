@@ -12,7 +12,7 @@ void DP_New (DecompressorPredictor * dp, ModelArray_t mos, context ctx);
 
 int DP_Predict (DecompressorPredictor * dp);
 
-void DP_Update (DecompressorPredictor * dp);
+void DP_Update (DecompressorPredictor * dp, int update);
 
 void DP_SelectModel (DecompressorPredictor * dp, Model * m);
 
