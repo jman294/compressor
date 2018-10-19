@@ -4,6 +4,7 @@
 #include "packingtape/compressorpredictor.h"
 #include "packingtape/decompressor.h"
 #include "packingtape/decompressorpredictor.h"
+#include "packingtape/modelenum.h"
 
 int main (int argc, char ** argv) {
   // Chech arguments: packingtape c/d input output
@@ -24,7 +25,7 @@ int main (int argc, char ** argv) {
     *p = (CompressorPredictor) {};
     ModelArray_t mos = malloc(sizeof(mos));
     S_MO_EnumerateAllModels(mos);
-    CP_New(p, mos, 0);
+    CP_New(p, mos, NUM_MODELS, 0);
     compress(input, output, p);
   } else if (argv[1][0] == 'd') {
     DecompressorPredictor* p = malloc(sizeof(*p));
