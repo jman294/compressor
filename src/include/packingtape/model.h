@@ -3,9 +3,13 @@
 
 #include "util.h"
 
+#define MODEL_LIMIT 4095
+
 typedef struct Model {
   int code;
   int data;
+  int lastPrediction;
+  float score;
 } Model;
 
 typedef Model * (*ModelArray_t)[2];

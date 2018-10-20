@@ -66,10 +66,27 @@ void test_select_model (void) {
   TEST_CHECK(p->currentModel->code == TEXT2);
 }
 
+void test_integrate (void) {
+  CompressorPredictor * cp = malloc(sizeof(CompressorPredictor));
+  ModelArray_t mos = malloc(sizeof(mos));
+  S_MO_EnumerateAllModels(mos);
+  CP_New(cp, mos, NUM_MODELS, 0);
+
+  CP_SelectModel(cp, (*cp->models)[0]);
+  TEST_CHECK(cp->currentModel == (*mos)[0]);
+  TEST_CHECK(cp->currentModel == (*cp->models)[0]);
+
+  int prediction = CP_Predict(cp);
+  TEST_CHECK(prediction >= 0 && prediction <= 4095);
+  TEST_CHECK(cp->currentModel->lastPrediction = prediction);
+  CP_Update(cp, 1);
+}
+
 TEST_LIST = {
     { "new_cp", test_new },
     { "update", test_update },
     { "prediction", test_predict },
     { "select_model", test_select_model },
+    { "all", test_integrate },
     { NULL, NULL }
 };

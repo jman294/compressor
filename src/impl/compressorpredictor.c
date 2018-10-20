@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 
 #include "util.h"
 #include "compressorpredictor.h"
@@ -17,13 +18,20 @@ void CP_New (CompressorPredictor * cp, ModelArray_t mos, int modelCount, context
 int CP_Predict (CompressorPredictor * cp) {
   if (cp->models != NULL) {
     for (int i = 0; i < cp->modelCount; i++) {
-      printf("%d\n", (*cp->models)[i]->code);
+      Model * currentModel = (*cp->models)[i];
+      currentModel->lastPrediction = MO_GetPrediction(currentModel, cp->ctx);
     }
   }
-  return 200;
+  return MO_GetPrediction(cp->currentModel, cp->ctx);
 }
 
 void CP_Update (CompressorPredictor * cp, int bit) {
+    for (int i = 0; i < cp->modelCount; i++) {
+      Model * currentModel = (*cp->models)[i];
+      /*printf("%f", pow(1 - fabs(bit - (float)currentModel->lastPrediction/((float)MODEL_LIMIT)), .5));*/
+      currentModel->score = pow(1 - fabs(bit - ((float)currentModel->lastPrediction/((float)MODEL_LIMIT))), 2) * currentModel->score;
+      printf("%f", currentModel->score);
+    }
   cp->ctx = (cp->ctx << 1) | bit;
 }
 

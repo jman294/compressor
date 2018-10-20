@@ -15,6 +15,7 @@ void S_MO_EnumerateAllModels (ModelArray_t mos) {
 
 void MO_New (Model * m, int code) {
   m->code = code;
+  m->score = 0;
 }
 
 int MO_GetPrediction (Model * m, context context) {
