@@ -5,7 +5,6 @@
 #include <stdint.h>
 
 typedef uint32_t uint32;
-typedef Model * (*mos)[2] ModelArray_t;
 
 // 32 Bit Context
 typedef uint32_t context;

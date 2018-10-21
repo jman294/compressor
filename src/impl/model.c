@@ -4,7 +4,7 @@
 #include "modelenum.h"
 #include "util.h"
 
-void S_MO_EnumerateAllModels (Model * (*mos)[2]) {
+void S_MO_EnumerateAllModels (ModelArray_t mos) {
   Model * text1 = malloc(sizeof(*text1));
   MO_New(text1, TEXT1);
   Model * text2 = malloc(sizeof(*text2));
@@ -15,8 +15,9 @@ void S_MO_EnumerateAllModels (Model * (*mos)[2]) {
 
 void MO_New (Model * m, int code) {
   m->code = code;
+  m->score = 0;
 }
 
 int MO_GetPrediction (Model * m, context context) {
-  return 200;
+  return 4095;
 }

@@ -25,6 +25,8 @@ install_headers(
     )
 
 lib_inc = include_directories('src/include/packingtape')
+cc = meson.get_compiler('c')
+m_dep = cc.find_library('m', required: true)
 
 lib = library('packingtape',
     sources: [
@@ -33,7 +35,8 @@ lib = library('packingtape',
       ],
     soversion: 20,
     install: true,
-    include_directories: lib_inc
+    include_directories: lib_inc,
+    dependencies: m_dep
     )
 
 exe_inc = include_directories('src/include')
@@ -43,6 +46,7 @@ executable('packingtape', 'src/main.c', link_with: lib, include_directories: exe
 # Testing
 test_sources = [
   'compressorpredictor',
+  'decompressorpredictor',
   'model',
   'compressor',
 ]

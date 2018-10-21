@@ -3,12 +3,18 @@
 
 #include "util.h"
 
+#define MODEL_LIMIT 4095
+
 typedef struct Model {
   int code;
   int data;
+  int lastPrediction;
+  float score;
 } Model;
 
-void S_MO_EnumerateAllModels (Model * (*mos)[2]); // A pointer to an array that contains pointers to Models
+typedef Model * (*ModelArray_t)[2];
+
+void S_MO_EnumerateAllModels (ModelArray_t mos); // A pointer to an array that contains pointers to Models
 
 void MO_New (Model * m, int code);
 
