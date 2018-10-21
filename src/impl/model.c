@@ -19,5 +19,5 @@ void MO_New (Model * m, int code) {
 }
 
 int MO_GetPrediction (Model * m, context context) {
-  return 200;
+  return 4095;
 }

@@ -80,6 +80,21 @@ void test_integrate (void) {
   TEST_CHECK(prediction >= 0 && prediction <= 4095);
   TEST_CHECK(cp->currentModel->lastPrediction = prediction);
   CP_Update(cp, 1);
+
+  prediction = CP_Predict(cp);
+  TEST_CHECK(prediction >= 0 && prediction <= 4095);
+  TEST_CHECK(cp->currentModel->lastPrediction = prediction);
+  CP_Update(cp, 1);
+
+  prediction = CP_Predict(cp);
+  TEST_CHECK(prediction >= 0 && prediction <= 4095);
+  TEST_CHECK(cp->currentModel->lastPrediction = prediction);
+  CP_Update(cp, 1);
+
+  prediction = CP_Predict(cp);
+  TEST_CHECK(prediction >= 0 && prediction <= 4095);
+  TEST_CHECK(cp->currentModel->lastPrediction = prediction);
+  CP_Update(cp, 0);
 }
 
 TEST_LIST = {
