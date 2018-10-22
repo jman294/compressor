@@ -19,7 +19,6 @@ void encode (uint32* x1, uint32* x2, int y, FILE* archive, int prediction, short
   while (((*x1^*x2)&0xff000000)==0) {
     putc(*x2>>24, archive);
     if (ftell(archive) % changeInterval == 0) {
-      printf("%ld\n", ftell(archive));
       putc(code, archive);
     }
     *x1<<=8;

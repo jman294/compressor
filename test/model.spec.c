@@ -14,7 +14,7 @@ void test_range (void) {
   MO_New(m, TEXT1);
 
   uint prediction = MO_GetPrediction(m, 0);
-  TEST_CHECK(prediction >= 0 && prediction <= 4095);
+  TEST_CHECK(prediction >= 0 && prediction <= MODEL_LIMIT);
 }
 
 void test_enumerate_models (void) {

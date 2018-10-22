@@ -24,8 +24,8 @@ int decode (uint32* x1, uint32* x2, uint32* x, int prediction, FILE* archive, sh
     (*x2)=((*x2)<<8)+255;
     int c=getc(archive);
     if (ftell(archive) % changeInterval == 0) {
-      printf("%ld\n", ftell(archive));
-      getc(archive);
+      int modelCode = (int)getc(archive);
+      printf("%d", modelCode);
     }
     if (c==EOF) c=0;
     (*x)=((*x)<<8)+c;

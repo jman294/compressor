@@ -18,6 +18,8 @@ void S_MO_EnumerateAllModels (ModelArray_t mos);
 
 void MO_New (Model * m, int code);
 
+//void MO_SetData (ModelData_t data);
+
 int MO_GetPrediction (Model * m, context context);
 
 #endif // MODEL_H_
