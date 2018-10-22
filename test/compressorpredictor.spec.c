@@ -66,6 +66,17 @@ void test_select_model (void) {
   TEST_CHECK(p->currentModel->code == TEXT2);
 }
 
+void test_best_model (void) {
+  CompressorPredictor * cp = malloc(sizeof(CompressorPredictor));
+  ModelArray_t mos = malloc(sizeof(mos));
+  S_MO_EnumerateAllModels(mos);
+  CP_New(cp, mos, NUM_MODELS, 0);
+  (*cp->models)[0]->score = .8;
+
+  TEST_CHECK(CP_GetBestModel(cp) != NULL);
+  TEST_CHECK((CP_GetBestModel(cp)->score - 0.8) <= 0.1);
+}
+
 void test_integrate (void) {
   CompressorPredictor * cp = malloc(sizeof(CompressorPredictor));
   ModelArray_t mos = malloc(sizeof(mos));
@@ -102,6 +113,7 @@ TEST_LIST = {
     { "update", test_update },
     { "prediction", test_predict },
     { "select_model", test_select_model },
+    { "best_model", test_best_model },
     { "all", test_integrate },
     { NULL, NULL }
 };
