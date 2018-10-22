@@ -28,7 +28,6 @@ int CP_Predict (CompressorPredictor * cp) {
 void CP_Update (CompressorPredictor * cp, int bit) {
     for (int i = 0; i < cp->modelCount; i++) {
       Model * currentModel = (*cp->models)[i];
-      /*printf("%f", pow(1 - fabs(bit - (float)currentModel->lastPrediction/((float)MODEL_LIMIT)), .5));*/
       currentModel->score = ((1 - fabs(bit - ((float)currentModel->lastPrediction/((float)MODEL_LIMIT))) * 0.55) + (.45 * currentModel->score))/2;
       printf("%f", currentModel->score);
     }

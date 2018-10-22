@@ -32,7 +32,7 @@ int main (int argc, char ** argv) {
     *p = (DecompressorPredictor) {};
     ModelArray_t mos = malloc(sizeof(mos));
     S_MO_EnumerateAllModels(mos);
-    DP_New(p, mos, 0);
+    DP_New(p, mos, NUM_MODELS, 0);
     decompress(input, output, p);
   }
 }

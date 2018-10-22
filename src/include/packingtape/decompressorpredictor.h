@@ -5,10 +5,12 @@
 
 typedef struct DecompressorPredictor {
   int ctx;
-  Model *m;
+  int modelCount;
+  ModelArray_t models;
+  Model * currentModel;
 } DecompressorPredictor;
 
-void DP_New (DecompressorPredictor * dp, ModelArray_t mos, context ctx);
+void DP_New (DecompressorPredictor * dp, ModelArray_t mos, int modelCount, context ctx);
 
 int DP_Predict (DecompressorPredictor * dp);
 
