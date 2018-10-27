@@ -6,8 +6,9 @@
 #define NUM_MODELS 2
 
 #define TEXT1 0
-#define TEXT1_Data 5
+static const ModelData_t TEXT1_Data = {200, 4000};
 
 #define TEXT2 1
+static const ModelData_t TEXT2_Data = {300, 4000};
 
 #endif // MODELENUM_H_
