@@ -6,9 +6,9 @@
 #include "compressorpredictor.h"
 #include "util.h"
 
-void encode (uint32* x1, uint32* x2, int y, FILE* archive, int prediction, short changeInterval, int code) {
+void encode (uint32_t* x1, uint32_t* x2, int y, FILE* archive, int prediction, short changeInterval, int code) {
   // Update the range
-  const uint32 xmid = *x1 + ((*x2-*x1) >> 12) * prediction;
+  const uint32_t xmid = *x1 + ((*x2-*x1) >> 12) * prediction;
   assert(xmid >= *x1 && xmid < *x2);
   if (y)
     *x2=xmid;
@@ -27,8 +27,8 @@ void encode (uint32* x1, uint32* x2, int y, FILE* archive, int prediction, short
 }
 
 void compress (FILE* input, FILE* output, CompressorPredictor* p) {
-  uint32 x1 = 0;
-  uint32 x2 = 0xffffffff;
+  uint32_t x1 = 0;
+  uint32_t x2 = 0xffffffff;
 
   short changeInterval = 128; // Every 128 bytes, we change models
 

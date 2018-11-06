@@ -23,8 +23,12 @@ void test_select (void) {
 }
 
 void test_predict (void) {
+  Model * m = malloc(sizeof(*m));
+  MO_New(m, TEXT1);
+  MO_SetData(m, &TEXT1_Data);
   DecompressorPredictor *p = malloc(sizeof(*p));
   DP_New(p, NULL, NUM_MODELS, 0);
+  DP_SelectModel(p, m);
   int prediction = DP_Predict(p);
   TEST_CHECK(prediction >= 0);
 }

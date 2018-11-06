@@ -26,5 +26,5 @@ void MO_SetData (Model * m, const ModelData_t * data) {
 }
 
 int MO_GetPrediction (Model * m, context context) {
-  return 4095;
+  return (*m->data)[context];
 }

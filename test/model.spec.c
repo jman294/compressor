@@ -12,6 +12,7 @@ void test_new (void) {
 void test_range (void) {
   Model * m = malloc(sizeof(*m));
   MO_New(m, TEXT1);
+  MO_SetData(m, &TEXT1_Data);
 
   uint prediction = MO_GetPrediction(m, 0);
   TEST_CHECK(prediction >= 0 && prediction <= MODEL_LIMIT);

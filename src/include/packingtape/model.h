@@ -1,11 +1,13 @@
 #ifndef MODEL_H_   /* Include guard */
 #define MODEL_H_
 
+#include <stdint.h>
 #include "util.h"
 
 #define MODEL_LIMIT 4095
+#define NUM_CONTEXTS UINT16_MAX
 
-typedef int ModelData_t[sizeof(context)];
+typedef int ModelData_t[NUM_CONTEXTS];
 
 typedef struct Model {
   int code;

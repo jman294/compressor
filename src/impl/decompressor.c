@@ -6,9 +6,9 @@
 #include "decompressor.h"
 #include "decompressorpredictor.h"
 
-int decode (uint32* x1, uint32* x2, uint32* x, int prediction, FILE* archive, short changeInterval) {
+int decode (uint32_t* x1, uint32_t* x2, uint32_t* x, int prediction, FILE* archive, short changeInterval) {
   // Update the range
-  const uint32 xmid = (*x1) + (((*x2)-(*x1)) >> 12) * prediction;
+  const uint32_t xmid = (*x1) + (((*x2)-(*x1)) >> 12) * prediction;
   assert(xmid >= (*x1) && xmid < (*x2));
   int y=0;
   if ((*x)<=xmid) {
@@ -34,9 +34,9 @@ int decode (uint32* x1, uint32* x2, uint32* x, int prediction, FILE* archive, sh
 }
 
 void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
-  uint32 x1 = 0;
-  uint32 x2 = 0xffffffff;
-  uint32 x = 0;
+  uint32_t x1 = 0;
+  uint32_t x2 = 0xffffffff;
+  uint32_t x = 0;
 
   // Reads in first 4 bytes into x
   for (int i=0; i<4; ++i) {
