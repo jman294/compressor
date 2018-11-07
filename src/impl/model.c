@@ -22,8 +22,10 @@ void MO_New (Model * m, int code) {
   switch (code) {
     case TEXT1:
       m->data = &TEXT1_Data;
+      break;
     case TEXT2:
       m->data = &TEXT2_Data;
+      break;
   }
 }
 

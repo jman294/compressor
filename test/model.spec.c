@@ -6,7 +6,8 @@
 void test_new (void) {
   Model * m = malloc(sizeof(*m));
   MO_New(m, TEXT1);
-  TEST_CHECK(m->code == 0);
+  TEST_CHECK(m->code == TEXT1);
+  TEST_CHECK(m->data == &TEXT1_Data);
 }
 
 void test_range (void) {
