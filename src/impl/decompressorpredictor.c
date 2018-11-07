@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "decompressorpredictor.h"
 #include "model.h"
 
@@ -8,7 +10,9 @@ void DP_New (DecompressorPredictor * dp, ModelArray_t mos, int modelCount, conte
 }
 
 int DP_Predict (DecompressorPredictor * dp) {
-  return MO_GetPrediction(dp->currentModel, dp->ctx);
+  /*assert(dp->currentModel != NULL);*/
+  return 200;
+  /*return MO_GetPrediction(dp->currentModel, dp->ctx);*/
 }
 
 void DP_Update (DecompressorPredictor * dp, int bit) {

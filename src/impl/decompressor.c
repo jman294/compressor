@@ -25,12 +25,15 @@ int decode (uint32_t* x1, uint32_t* x2, uint32_t* x, int prediction, FILE* archi
     int c=getc(archive);
     if (ftell(archive) % changeInterval == 0) {
       int modelCode = (int)getc(archive);
-      printf("%d", modelCode);
     }
     if (c==EOF) c=0;
     (*x)=((*x)<<8)+c;
   }
   return y;
+}
+
+int readHeader (FILE* input) {
+  return getc(input);
 }
 
 void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
@@ -47,6 +50,11 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
 
   int changeInterval = 128; // Has to be synced with compressor's change interval
 
+  /*int startingCode = readHeader(input);*/
+  /*Model *m = malloc(sizeof(*m));*/
+  /*MO_New(m, startingCode);*/
+  /*printf("%d", (*m->data)[0]);*/
+  /*DP_SelectModel(p, m);*/
   while (!decode(&x1, &x2, &x, DP_Predict(p), input, changeInterval)) {
     int c=1;
     while (c<256) {

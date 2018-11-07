@@ -5,6 +5,7 @@
 #include "compressor.h"
 #include "compressorpredictor.h"
 #include "util.h"
+#include "modelenum.h"
 
 void encode (uint32_t* x1, uint32_t* x2, int y, FILE* archive, int prediction, short changeInterval, int code) {
   // Update the range
@@ -26,6 +27,10 @@ void encode (uint32_t* x1, uint32_t* x2, int y, FILE* archive, int prediction, s
   }
 }
 
+void writeHeader (FILE* archive, int startingCode) {
+  putc(startingCode, archive);
+}
+
 void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   uint32_t x1 = 0;
   uint32_t x2 = 0xffffffff;
@@ -34,7 +39,8 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
 
   int c;
 
-  int code = CP_GetBestModel(p)->code;
+  int code;
+  /*writeHeader(output, TEXT1); // 1 Is Starting model. Can be picked programmatically*/
   while ((c=getc(input))!=EOF) {
     code = CP_GetBestModel(p)->code;
     encode(&x1, &x2, 0, output, CP_Predict(p), changeInterval, code);

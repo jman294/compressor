@@ -19,6 +19,12 @@ void MO_New (Model * m, int code) {
   m->code = code;
   m->score = 0;
   m->data = NULL;
+  switch (code) {
+    case TEXT1:
+      m->data = &TEXT1_Data;
+    case TEXT2:
+      m->data = &TEXT2_Data;
+  }
 }
 
 void MO_SetData (Model * m, const ModelData_t * data) {
@@ -26,5 +32,6 @@ void MO_SetData (Model * m, const ModelData_t * data) {
 }
 
 int MO_GetPrediction (Model * m, context context) {
-  return (*m->data)[context];
+  return 200;
+  /*return (*m->data)[context];*/
 }
