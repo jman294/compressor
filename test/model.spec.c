@@ -7,23 +7,24 @@ void test_new (void) {
   Model * m = malloc(sizeof(*m));
   MO_New(m, TEXT1);
   TEST_CHECK(m->code == TEXT1);
-  TEST_CHECK(m->data == &TEXT1_Data);
+  TEST_CHECK((*m->data)[0] == TEXT1_Data[0]);
 }
 
-void test_range (void) {
+void test_get_prediction (void) {
   Model * m = malloc(sizeof(*m));
   MO_New(m, TEXT1);
-  MO_SetData(m, &TEXT1_Data);
 
-  uint prediction = MO_GetPrediction(m, 0);
+  context expContext = 0;
+  int prediction = MO_GetPrediction(m, expContext);
   TEST_CHECK(prediction >= 0 && prediction <= MODEL_LIMIT);
+  TEST_CHECK(prediction == TEXT1_Data[expContext]);
 }
 
 void test_setdata (void) {
   Model * m = malloc(sizeof(*m));
   MO_New(m, TEXT1);
 
-  TEST_CHECK(m->data == NULL);
+  TEST_CHECK((*m->data)[0] == TEXT1_Data[0]);
 
   MO_SetData(m, &TEXT1_Data);
   TEST_CHECK((*m->data)[0] == TEXT1_Data[0]);
@@ -35,7 +36,6 @@ void test_setdata (void) {
 void test_enumerate_models (void) {
   Model * text1 = malloc(sizeof(*text1));
   MO_New(text1, TEXT1);
-  MO_SetData(text1, &TEXT1_Data);
   Model * text2 = malloc(sizeof(*text2));
   MO_New(text2, TEXT2);
   MO_SetData(text2, &TEXT2_Data);
@@ -52,10 +52,9 @@ void test_enumerate_models (void) {
   }
 }
 
-
 TEST_LIST = {
     { "new_m", test_new },
-    { "test_range", test_range },
+    { "test_get_prediction", test_get_prediction },
     { "test_setdata", test_setdata },
     { "test_enumerate_models", test_enumerate_models },
     { NULL, NULL }
