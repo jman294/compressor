@@ -23,13 +23,17 @@ void test_select (void) {
 }
 
 void test_predict (void) {
+  context ctx = 0;
   Model * m = malloc(sizeof(*m));
   MO_New(m, TEXT1);
-  MO_SetData(m, &TEXT1_Data);
   DecompressorPredictor *p = malloc(sizeof(*p));
-  DP_New(p, NULL, NUM_MODELS, 0);
+  DP_New(p, NULL, NUM_MODELS, ctx);
   DP_SelectModel(p, m);
+
   int prediction = DP_Predict(p);
+  int mPrediction = MO_GetPrediction(m, ctx);
+
+  TEST_CHECK(prediction == mPrediction);
   TEST_CHECK(prediction >= 0);
 }
 

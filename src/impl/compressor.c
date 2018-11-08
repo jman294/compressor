@@ -28,7 +28,8 @@ void encode (uint32_t* x1, uint32_t* x2, int y, FILE* archive, int prediction, s
 }
 
 void writeHeader (FILE* archive, int startingCode) {
-  putc(startingCode, archive);
+  printf("%d\n", startingCode);
+  putc((char)startingCode, archive);
 }
 
 void compress (FILE* input, FILE* output, CompressorPredictor* p) {
@@ -40,10 +41,11 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   int c;
 
   int code;
-  /*writeHeader(output, TEXT1); // 1 Is Starting model. Can be picked programmatically*/
+  writeHeader(output, TEXT1); // 1 Is Starting model. Can be picked intelligently
   while ((c=getc(input))!=EOF) {
     code = CP_GetBestModel(p)->code;
     encode(&x1, &x2, 0, output, CP_Predict(p), changeInterval, code);
+    /*printf("%d\n", code);*/
     for (int i=7; i>=0; --i)
       encode(&x1, &x2, (c>>i)&1, output, CP_Predict(p), changeInterval, code);
   }

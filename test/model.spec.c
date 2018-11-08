@@ -7,7 +7,7 @@ void test_new (void) {
   Model * m = malloc(sizeof(*m));
   MO_New(m, TEXT1);
   TEST_CHECK(m->code == TEXT1);
-  TEST_CHECK((*m->data)[0] == TEXT1_Data[0]);
+  TEST_CHECK((*m->data)[5] == TEXT1_Data[5]);
 }
 
 void test_get_prediction (void) {

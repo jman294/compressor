@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "util.h"
+#include "modelenum.h"
 #include "decompressor.h"
 #include "decompressorpredictor.h"
 
@@ -33,7 +34,7 @@ int decode (uint32_t* x1, uint32_t* x2, uint32_t* x, int prediction, FILE* archi
 }
 
 int readHeader (FILE* input) {
-  return getc(input);
+  return (int)getc(input);
 }
 
 void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
@@ -50,11 +51,11 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
 
   int changeInterval = 128; // Has to be synced with compressor's change interval
 
-  /*int startingCode = readHeader(input);*/
-  /*Model *m = malloc(sizeof(*m));*/
-  /*MO_New(m, startingCode);*/
-  /*printf("%d", (*m->data)[0]);*/
-  /*DP_SelectModel(p, m);*/
+  int startingCode = readHeader(input);
+  Model *m = malloc(sizeof(*m));
+  MO_New(m, startingCode);
+  printf("%d\n", startingCode);
+  DP_SelectModel(p, m);
   while (!decode(&x1, &x2, &x, DP_Predict(p), input, changeInterval)) {
     int c=1;
     while (c<256) {

@@ -5,6 +5,7 @@
 #include "util.h"
 
 void S_MO_EnumerateAllModels (ModelArray_t mos) {
+  // NOTE This is an enumeration of all existing models
   Model * text1 = malloc(sizeof(*text1));
   MO_New(text1, TEXT1);
   Model * text2 = malloc(sizeof(*text2));

@@ -26,6 +26,9 @@ int main (int argc, char ** argv) {
     ModelArray_t mos = malloc(sizeof(mos));
     S_MO_EnumerateAllModels(mos);
     CP_New(p, mos, NUM_MODELS, 0);
+    Model * m = malloc(sizeof(*m));
+    MO_New(m , TEXT1); // Can pick intelligently
+    CP_SelectModel(p, m);
     compress(input, output, p);
   } else if (argv[1][0] == 'd') {
     DecompressorPredictor* p = malloc(sizeof(*p));

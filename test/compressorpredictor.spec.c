@@ -42,12 +42,17 @@ void test_update (void) {
 }
 
 void test_predict (void) {
+  context ctx = 0;
+  Model * m = malloc(sizeof(*m));
+  MO_New(m, TEXT1);
   CompressorPredictor *p = malloc(sizeof(*p));
-  ModelArray_t mos = malloc(sizeof(mos));
-  S_MO_EnumerateAllModels(mos);
-  CP_New(p, mos, NUM_MODELS, 0);
-  int prediction = CP_Predict(p);
+  CP_New(p, NULL, NUM_MODELS, ctx);
+  CP_SelectModel(p, m);
 
+  int prediction = CP_Predict(p);
+  int mPrediction = MO_GetPrediction(m, ctx);
+
+  TEST_CHECK(prediction == mPrediction);
   TEST_CHECK(prediction >= 0);
 }
 
