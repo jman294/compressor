@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -7,7 +8,7 @@
 #include "decompressor.h"
 #include "decompressorpredictor.h"
 
-int decode (uint32_t* x1, uint32_t* x2, uint32_t* x, int prediction, FILE* archive, short changeInterval) {
+int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, int prediction, FILE* archive, short changeInterval) {
   // Update the range
   const uint32_t xmid = (*x1) + (((*x2)-(*x1)) >> 12) * prediction;
   assert(xmid >= (*x1) && xmid < (*x2));
@@ -18,6 +19,7 @@ int decode (uint32_t* x1, uint32_t* x2, uint32_t* x, int prediction, FILE* archi
   }
   else
     (*x1)=xmid+1;
+  DP_Update(p, y);
 
   // Shift equal MSB's out
   while ((((*x1)^(*x2))&0xff000000)==0) {
@@ -26,6 +28,9 @@ int decode (uint32_t* x1, uint32_t* x2, uint32_t* x, int prediction, FILE* archi
     int c=getc(archive);
     if (ftell(archive) % changeInterval == 0) {
       int modelCode = (int)getc(archive);
+      Model * m = malloc(sizeof(*m));
+      MO_New(m, modelCode);
+      DP_SelectModel(p, m);
     }
     if (c==EOF) c=0;
     (*x)=((*x)<<8)+c;
@@ -42,6 +47,11 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   uint32_t x2 = 0xffffffff;
   uint32_t x = 0;
 
+  int startingCode = readHeader(input);
+  Model *m = malloc(sizeof(*m));
+  MO_New(m, startingCode);
+  DP_SelectModel(p, m);
+
   // Reads in first 4 bytes into x
   for (int i=0; i<4; ++i) {
     int c=getc(input);
@@ -51,15 +61,10 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
 
   int changeInterval = 128; // Has to be synced with compressor's change interval
 
-  int startingCode = readHeader(input);
-  Model *m = malloc(sizeof(*m));
-  MO_New(m, startingCode);
-  printf("%d\n", startingCode);
-  DP_SelectModel(p, m);
-  while (!decode(&x1, &x2, &x, DP_Predict(p), input, changeInterval)) {
+  while (!decode(p, &x1, &x2, &x, DP_Predict(p), input, changeInterval)) {
     int c=1;
     while (c<256) {
-      c+=c+decode(&x1, &x2, &x, DP_Predict(p), input, changeInterval);
+      c+=c+decode(p, &x1, &x2, &x, DP_Predict(p), input, changeInterval);
     }
     putc(c-256, output);
   }
