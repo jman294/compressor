@@ -15,7 +15,6 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
     *x2=xmid;
   else
     *x1=xmid+1;
-  /*printf("%d\n", y);*/
   CP_Update(p, y);
 
   // Shift equal MSB's out
@@ -46,10 +45,6 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   while ((c=getc(input))!=EOF) {
     code = CP_GetBestModel(p)->code;
     encode(p, &x1, &x2, 0, output, CP_Predict(p), changeInterval, code);
-    printf("%d\n", CP_GetBestModel(p)->code);
-    /*printf("%f\t%f\t%f\n", CP_GetBestModel(p)->score, (*p->models)[1]->score, (*p->models)[0]->score);*/
-    /*printf("%d\t%d\n", MO_GetPrediction((*p->models)[1], p->ctx%5), MO_GetPrediction((*p->models)[0], p->ctx%5));*/
-    /*printf("%d\t%d\n", (*p->models)[1]->lastPrediction, (*p->models)[0]->lastPrediction);*/
     for (int i=7; i>=0; --i)
       encode(p, &x1, &x2, (c>>i)&1, output, CP_Predict(p), changeInterval, code);
   }
