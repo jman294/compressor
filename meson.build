@@ -43,6 +43,16 @@ exe_inc = include_directories('src/include')
 
 executable('packingtape', 'src/main.c', link_with: lib, include_directories: exe_inc)
 
+# Models
+lib_inc = include_directories('src/models/')
+model_sources = [
+    'simple',
+    ]
+
+foreach source: model_sources
+  model_exec = executable(source, 'src/models/' + source + '.c')
+endforeach
+
 # Testing
 test_sources = [
   'compressorpredictor',
