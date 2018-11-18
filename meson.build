@@ -36,21 +36,20 @@ lib = library('packingtape',
     soversion: 20,
     install: true,
     include_directories: lib_inc,
-    dependencies: m_dep
+    dependencies: m_dep,
     )
 
 exe_inc = include_directories('src/include')
 
 executable('packingtape', 'src/main.c', link_with: lib, include_directories: exe_inc)
 
-# Models
-lib_inc = include_directories('src/models/')
+# Model Project
 model_sources = [
     'simple',
     ]
 
-foreach source: model_sources
-  model_exec = executable(source, 'src/models/' + source + '.c')
+foreach i: model_sources
+  executable('models/' + i, 'src/impl/models/' + i + '.c', include_directories: exe_inc)
 endforeach
 
 # Testing
