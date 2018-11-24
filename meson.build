@@ -46,10 +46,15 @@ executable('packingtape', 'src/main.c', link_with: lib, include_directories: exe
 # Model Project
 model_sources = [
     'simple',
+    'generic'
+    ]
+
+model_headers = [
+    'src/include/packingtape/models/generic.h'
     ]
 
 foreach i: model_sources
-  executable('models/' + i, 'src/impl/models/' + i + '.c', include_directories: exe_inc)
+  executable(['models/' + i, 'src/impl/models/' + i + '.c', headers, model_headers], include_directories: lib_inc)
 endforeach
 
 # Testing
