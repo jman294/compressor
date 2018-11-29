@@ -63,10 +63,12 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
 
   while (!decode(p, &x1, &x2, &x, DP_Predict(p), input, changeInterval)) {
     int c=1;
-    while (c<256) {
+    // Decode until you reach a byte
+    while (c<128) {
       c+=c+decode(p, &x1, &x2, &x, DP_Predict(p), input, changeInterval);
     }
-    putc(c-256, output);
+    // c started at 1. You have to remove it from the output because it was not 0
+    putc(c-128, output);
   }
 
   fclose(input);

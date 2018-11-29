@@ -189,7 +189,7 @@ int main(int argc, char** argv) {
       int c=1;
       while (c<256)
         c+=c+e.decode();
-      putc(c-256, out);
+      putc(c, out);
     }
   }
 

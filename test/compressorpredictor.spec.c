@@ -86,7 +86,7 @@ void test_integrate (void) {
   CompressorPredictor * cp = malloc(sizeof(CompressorPredictor));
   ModelArray_t mos = malloc(sizeof(mos));
   S_MO_EnumerateAllModels(mos);
-  CP_New(cp, mos, NUM_MODELS, 0);
+  CP_New(cp, mos, NUM_MODELS, 0x6267);
 
   CP_SelectModel(cp, (*cp->models)[0]);
   TEST_CHECK(cp->currentModel == (*mos)[0]);
@@ -94,22 +94,22 @@ void test_integrate (void) {
 
   int prediction = CP_Predict(cp);
   TEST_CHECK(prediction >= 0 && prediction <= 4095);
-  TEST_CHECK(cp->currentModel->lastPrediction = prediction);
+  TEST_CHECK(cp->currentModel->lastPrediction == prediction);
   CP_Update(cp, 1);
 
   prediction = CP_Predict(cp);
   TEST_CHECK(prediction >= 0 && prediction <= 4095);
-  TEST_CHECK(cp->currentModel->lastPrediction = prediction);
+  TEST_CHECK(cp->currentModel->lastPrediction == prediction);
   CP_Update(cp, 1);
 
   prediction = CP_Predict(cp);
   TEST_CHECK(prediction >= 0 && prediction <= 4095);
-  TEST_CHECK(cp->currentModel->lastPrediction = prediction);
+  TEST_CHECK(cp->currentModel->lastPrediction == prediction);
   CP_Update(cp, 1);
 
   prediction = CP_Predict(cp);
   TEST_CHECK(prediction >= 0 && prediction <= 4095);
-  TEST_CHECK(cp->currentModel->lastPrediction = prediction);
+  TEST_CHECK(cp->currentModel->lastPrediction == prediction);
   CP_Update(cp, 0);
 }
 
@@ -119,6 +119,6 @@ TEST_LIST = {
     { "prediction", test_predict },
     { "select_model", test_select_model },
     { "best_model", test_best_model },
-    { "all", test_integrate },
+    { "integrate", test_integrate },
     { NULL, NULL }
 };

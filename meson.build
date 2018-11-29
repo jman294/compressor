@@ -17,6 +17,8 @@ headers = [
     'src/include/packingtape/decompressorpredictor.h',
     'src/include/packingtape/compressor.h',
     'src/include/packingtape/compressorpredictor.h',
+    'src/include/packingtape/models/TEXT1.h',
+    'src/include/packingtape/models/TEXT2.h',
     ]
 
 install_headers(
@@ -46,15 +48,10 @@ executable('packingtape', 'src/main.c', link_with: lib, include_directories: exe
 # Model Project
 model_sources = [
     'simple',
-    'generic'
-    ]
-
-model_headers = [
-    'src/include/packingtape/models/generic.h'
     ]
 
 foreach i: model_sources
-  executable(['models/' + i, 'src/impl/models/' + i + '.c', headers, model_headers], include_directories: lib_inc)
+  executable(['models/' + i, 'src/models/' + i + '.c', headers], include_directories: lib_inc)
 endforeach
 
 # Testing

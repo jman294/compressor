@@ -38,15 +38,16 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
 
   short changeInterval = 128; // Every 128 bytes, we change models
 
-  int c;
-
   int code;
-  writeHeader(output, TEXT1); // 1 Is Starting model. Can be picked intelligently
+  writeHeader(output, p->currentModel->code); // 1 Is Starting model. Can be picked intelligently
+
+  int c;
   while ((c=getc(input))!=EOF) {
     code = CP_GetBestModel(p)->code;
-    encode(p, &x1, &x2, 0, output, CP_Predict(p), changeInterval, code);
-    for (int i=7; i>=0; --i)
+    /*encode(p, &x1, &x2, 0, output, CP_Predict(p), changeInterval, code);*/
+    for (int i=7; i>=0; --i) {
       encode(p, &x1, &x2, (c>>i)&1, output, CP_Predict(p), changeInterval, code);
+    }
   }
   encode(p, &x1, &x2, 1, output, CP_Predict(p), changeInterval, code);  // EOF code
   flush(&x1, &x2, output);
