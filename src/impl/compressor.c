@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -21,7 +22,11 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   while (((*x1^*x2)&0xff000000)==0) {
     putc(*x2>>24, archive);
     if (ftell(archive) % changeInterval == 0) {
+      printf("%x\n", ftell(archive));
       putc(code, archive);
+      Model * m = malloc(sizeof(*m));
+      MO_New(m, code);
+      CP_SelectModel(p, m);
     }
     *x1<<=8;
     *x2=(*x2<<8)+255;
@@ -45,6 +50,7 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   while ((c=getc(input))!=EOF) {
     code = CP_GetBestModel(p)->code;
     /*encode(p, &x1, &x2, 0, output, CP_Predict(p), changeInterval, code);*/
+    /*printf("%d\n", p->currentModel->code);*/
     for (int i=7; i>=0; --i) {
       encode(p, &x1, &x2, (c>>i)&1, output, CP_Predict(p), changeInterval, code);
     }
@@ -54,4 +60,5 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
 
   fclose(output);
   fclose(input);
+  printf("---------\n");
 }

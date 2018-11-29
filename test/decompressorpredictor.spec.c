@@ -20,6 +20,10 @@ void test_select (void) {
   MO_New(m, TEXT1);
   DP_SelectModel(p, m);
   TEST_CHECK(p->currentModel->code == m->code);
+
+  MO_New(m, TEXT2);
+  DP_SelectModel(p, m);
+  TEST_CHECK(p->currentModel->code == m->code);
 }
 
 void test_predict (void) {

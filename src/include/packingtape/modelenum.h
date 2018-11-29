@@ -19,7 +19,7 @@ static const ModelData_t TEXT1_Data = TEXT1_Data_d;
 //};
 
 #define TEXT2 1
-static const ModelData_t TEXT2_Data = TEXT1_Data_d;
+static const ModelData_t TEXT2_Data = TEXT2_Data_d;
 //static const ModelData_t TEXT2_Data = {
   //600, 95, 1000, 450, 111, 400, 400, 400, 400, 600, 200, 300, 300, 400, 400, 600, 200, 300, 300, 400, 400, 4000, 200, 300
 //};

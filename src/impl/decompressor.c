@@ -28,6 +28,7 @@ int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, 
     int c=getc(archive);
     if (ftell(archive) % changeInterval == 0) {
       int modelCode = (int)getc(archive);
+      printf("%x\n", modelCode);
       Model * m = malloc(sizeof(*m));
       MO_New(m, modelCode);
       DP_SelectModel(p, m);
@@ -64,10 +65,11 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   while (!decode(p, &x1, &x2, &x, DP_Predict(p), input, changeInterval)) {
     int c=1;
     // Decode until you reach a byte
+    /*printf("%d\n", p->currentModel->code);*/
     while (c<128) {
       c+=c+decode(p, &x1, &x2, &x, DP_Predict(p), input, changeInterval);
     }
-    // c started at 1. You have to remove it from the output because it was not 0
+    // c started at 1. You have to remove it from the output because it was not 0, and the 1 sticks to the front of the decoded byte. Hence the subtraction.
     putc(c-128, output);
   }
 
