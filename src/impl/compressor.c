@@ -22,11 +22,6 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   // Shift equal MSB's out
   while (((*x1^*x2)&0xff000000)==0) {
     putc(*x2>>24, archive);
-    if (ftell(archive) % 128 == 0) {
-      int modelCode = CP_GetBestModel(p)->code;
-      unsigned char markByte = /*(modelCode << 7) | */(ftell(input) % 128);
-      printf("asdlfkasldkfj %ld %ld %ld\n", ftell(archive), ftell(input), markByte & 0b01111111 + ftell(input));
-    }
     *x1<<=8;
     *x2=(*x2<<8)+255;
   }
@@ -44,20 +39,24 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
 
   writeHeader(output, p->currentModel->code); // 1 Is Starting model. Can be picked intelligently
 
-  bool outputInFour = false;
-  short tempByteCount = 0;
+  /*// FIXME the header size needs to be able to work for file of any size*/
+  /*unsigned char header[100] =*/
+
+  unsigned long headerPos = 1;
 
   int c;
   while ((c=getc(input))!=EOF) {
-    /*if (outputInFour) {*/
-      /*if (tempByteCount >= 3) {*/
-        /*printf("asdlfkasldkfj %ld\n", ftell(output));*/
-        /*tempByteCount = 0;*/
-        /*outputInFour = false;*/
-      /*} else {*/
-        /*tempByteCount += 1;*/
-      /*}*/
-    /*}*/
+    if (ftell(input) % changeInterval == 0) {
+      int modelCode = CP_GetBestModel(p)->code;
+      printf("%ld %ld %d\n", ftell(output), ftell(input), modelCode);
+      Model *m = malloc(sizeof(*m));
+      MO_New(m, modelCode);
+      CP_SelectModel(p, m);
+      fseek(output, headerPos, SEEK_SET);
+      putc(modelCode, output);
+      headerPos += 1;
+      fseek(output, 0, SEEK_END);
+    }
     /*encode(p, &x1, &x2, 0, output, CP_Predict(p), changeInterval, code);*/
     for (int i=7; i>=0; --i) {
       encode(p, &x1, &x2, (c>>i)&1, output, input, CP_Predict(p), changeInterval);

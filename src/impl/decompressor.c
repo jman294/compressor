@@ -26,9 +26,8 @@ int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, 
     (*x1)<<=8;
     (*x2)=((*x2)<<8)+255;
     int c=getc(archive);
-    if (ftell(archive) % changeInterval == 0) {
-      printf("%ld %ld\n", ftell(archive), ftell(output));
-    }
+    /*if (ftell(archive) % changeInterval == 0) {*/
+    /*}*/
     if (c==EOF) c=0;
     (*x)=((*x)<<8)+c;
   }
@@ -66,6 +65,9 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
     }
     // c started at 1. You have to remove it from the output because it was not 0, and the 1 sticks to the front of the decoded byte. Hence the subtraction.
     putc(c-128, output);
+    if (ftell(output) % 128 == 0) {
+      printf("%ld %ld\n", ftell(input), ftell(output));
+    }
   }
   printf("donzo\n");
 
