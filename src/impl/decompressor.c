@@ -8,7 +8,7 @@
 #include "decompressor.h"
 #include "decompressorpredictor.h"
 
-int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, int prediction, FILE* archive, short changeInterval) {
+int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, int prediction, FILE* archive, FILE* output, short changeInterval) {
   // Update the range
   const uint32_t xmid = (*x1) + (((*x2)-(*x1)) >> 12) * prediction;
   assert(xmid >= (*x1) && xmid < (*x2));
@@ -27,11 +27,7 @@ int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, 
     (*x2)=((*x2)<<8)+255;
     int c=getc(archive);
     if (ftell(archive) % changeInterval == 0) {
-      int modelCode = (int)getc(archive);
-      printf("%x\n", modelCode);
-      Model * m = malloc(sizeof(*m));
-      MO_New(m, modelCode);
-      DP_SelectModel(p, m);
+      printf("%ld %ld\n", ftell(archive), ftell(output));
     }
     if (c==EOF) c=0;
     (*x)=((*x)<<8)+c;
@@ -62,16 +58,16 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
 
   int changeInterval = 128; // Has to be synced with compressor's change interval
 
-  while (!decode(p, &x1, &x2, &x, DP_Predict(p), input, changeInterval)) {
+  while (!decode(p, &x1, &x2, &x, DP_Predict(p), input, output, changeInterval)) {
     int c=1;
     // Decode until you reach a byte
-    /*printf("%d\n", p->currentModel->code);*/
     while (c<128) {
-      c+=c+decode(p, &x1, &x2, &x, DP_Predict(p), input, changeInterval);
+      c+=c+decode(p, &x1, &x2, &x, DP_Predict(p), input, output, changeInterval);
     }
     // c started at 1. You have to remove it from the output because it was not 0, and the 1 sticks to the front of the decoded byte. Hence the subtraction.
     putc(c-128, output);
   }
+  printf("donzo\n");
 
   fclose(input);
   fclose(output);

@@ -9,6 +9,8 @@ typedef struct CompressorPredictor {
   ModelArray_t models;
   int modelCount;
   Model * currentModel;
+
+  int predictionCount;
 } CompressorPredictor;
 
 void CP_New (CompressorPredictor * cp, ModelArray_t mos, int modelCount, context ctx);

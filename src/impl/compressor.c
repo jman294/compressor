@@ -2,13 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "compressor.h"
 #include "compressorpredictor.h"
 #include "util.h"
 #include "modelenum.h"
 
-void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* archive, int prediction, short changeInterval, int code) {
+void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* archive, FILE* input, int prediction, short changeInterval) {
   // Update the range
   const uint32_t xmid = *x1 + ((*x2-*x1) >> 12) * prediction;
   assert(xmid >= *x1 && xmid < *x2);
@@ -21,12 +22,10 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   // Shift equal MSB's out
   while (((*x1^*x2)&0xff000000)==0) {
     putc(*x2>>24, archive);
-    if (ftell(archive) % changeInterval == 0) {
-      printf("%x\n", ftell(archive));
-      putc(code, archive);
-      Model * m = malloc(sizeof(*m));
-      MO_New(m, code);
-      CP_SelectModel(p, m);
+    if (ftell(archive) % 128 == 0) {
+      int modelCode = CP_GetBestModel(p)->code;
+      unsigned char markByte = /*(modelCode << 7) | */(ftell(input) % 128);
+      printf("asdlfkasldkfj %ld %ld %ld\n", ftell(archive), ftell(input), markByte & 0b01111111 + ftell(input));
     }
     *x1<<=8;
     *x2=(*x2<<8)+255;
@@ -43,19 +42,28 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
 
   short changeInterval = 128; // Every 128 bytes, we change models
 
-  int code;
   writeHeader(output, p->currentModel->code); // 1 Is Starting model. Can be picked intelligently
+
+  bool outputInFour = false;
+  short tempByteCount = 0;
 
   int c;
   while ((c=getc(input))!=EOF) {
-    code = CP_GetBestModel(p)->code;
+    /*if (outputInFour) {*/
+      /*if (tempByteCount >= 3) {*/
+        /*printf("asdlfkasldkfj %ld\n", ftell(output));*/
+        /*tempByteCount = 0;*/
+        /*outputInFour = false;*/
+      /*} else {*/
+        /*tempByteCount += 1;*/
+      /*}*/
+    /*}*/
     /*encode(p, &x1, &x2, 0, output, CP_Predict(p), changeInterval, code);*/
-    /*printf("%d\n", p->currentModel->code);*/
     for (int i=7; i>=0; --i) {
-      encode(p, &x1, &x2, (c>>i)&1, output, CP_Predict(p), changeInterval, code);
+      encode(p, &x1, &x2, (c>>i)&1, output, input, CP_Predict(p), changeInterval);
     }
   }
-  encode(p, &x1, &x2, 1, output, CP_Predict(p), changeInterval, code);  // EOF code
+  encode(p, &x1, &x2, 1, output, input, CP_Predict(p), changeInterval);  // EOF code
   flush(&x1, &x2, output);
 
   fclose(output);

@@ -10,6 +10,7 @@ void CP_New (CompressorPredictor * cp, ModelArray_t mos, int modelCount, context
   cp->ctx = ctx;
   cp->models = mos;
   cp->modelCount = modelCount;
+  cp->predictionCount = 0;
 }
 
 int CP_Predict (CompressorPredictor * cp) {
@@ -19,6 +20,7 @@ int CP_Predict (CompressorPredictor * cp) {
       currentModel->lastPrediction = MO_GetPrediction(currentModel, cp->ctx);
     }
   }
+  cp->predictionCount += 1;
   int prediction = MO_GetPrediction(cp->currentModel, cp->ctx);
   return prediction;
 }
@@ -36,6 +38,7 @@ void CP_UpdateCtx (CompressorPredictor * cp, int bit) {
 }
 
 void CP_SelectModel (CompressorPredictor * cp, Model * m) {
+  cp->predictionCount = 0;
   cp->currentModel = m;
 }
 
