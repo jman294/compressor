@@ -17,7 +17,7 @@ int main (int argc, char ** argv) {
   // Open files
   FILE *input=fopen(argv[2], "rb");
   if (!input) perror(argv[2]), exit(1);
-  FILE *output=fopen(argv[3], "wb");
+  FILE *output=fopen(argv[3], "w+b");
   if (!output) perror(argv[3]), exit(1);
 
   if (argv[1][0] == 'c') {

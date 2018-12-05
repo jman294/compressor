@@ -27,28 +27,27 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   }
 }
 
-void writeHeader (FILE* archive, int startingCode) {
+void writeHeader (FILE* archive, int startingCode, unsigned long headerLength) {
+  rewind(archive);
   putc(startingCode, archive);
+  putc(headerLength, archive);
 }
 
 void compress (FILE* input, FILE* output, CompressorPredictor* p) {
+  int startingCode = p->currentModel->code;
   uint32_t x1 = 0;
   uint32_t x2 = 0xffffffff;
 
-  short changeInterval = 128; // Every 128 bytes, we change models
+  int changeInterval = 128;
 
-  writeHeader(output, p->currentModel->code); // 1 Is Starting model. Can be picked intelligently
+  unsigned long headerPos = 2;
+  unsigned long headerLength = 3; // This is only for testing purposes
 
-  /*// FIXME the header size needs to be able to work for file of any size*/
-  /*unsigned char header[100] =*/
-
-  unsigned long headerPos = 1;
-
+  fseek(output, headerLength, SEEK_SET);
   int c;
   while ((c=getc(input))!=EOF) {
     if (ftell(input) % changeInterval == 0) {
       int modelCode = CP_GetBestModel(p)->code;
-      printf("%ld %ld %d\n", ftell(output), ftell(input), modelCode);
       Model *m = malloc(sizeof(*m));
       MO_New(m, modelCode);
       CP_SelectModel(p, m);
@@ -56,6 +55,10 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
       putc(modelCode, output);
       headerPos += 1;
       fseek(output, 0, SEEK_END);
+      if (headerLength > ftell(output)) {
+        fseek(output, headerLength, SEEK_SET);
+      }
+      printf("%ld %ld %d\n", ftell(output), ftell(input), modelCode);
     }
     /*encode(p, &x1, &x2, 0, output, CP_Predict(p), changeInterval, code);*/
     for (int i=7; i>=0; --i) {
@@ -65,7 +68,9 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   encode(p, &x1, &x2, 1, output, input, CP_Predict(p), changeInterval);  // EOF code
   flush(&x1, &x2, output);
 
+  writeHeader(output, startingCode, headerLength); // Can be picked intelligently
+
+  printf("--------- %ld %x\n", headerPos, getc(output));
   fclose(output);
   fclose(input);
-  printf("---------\n");
 }
