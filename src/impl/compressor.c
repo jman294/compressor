@@ -18,6 +18,7 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   else
     *x1=xmid+1;
   CP_Update(p, y);
+  printf("%d %d\n", y, p->currentModel->code);
 
   // Shift equal MSB's out
   while (((*x1^*x2)&0xff000000)==0) {
@@ -41,12 +42,15 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   int changeInterval = 128;
 
   unsigned long headerPos = 2;
-  unsigned long headerLength = 3; // This is only for testing purposes
+  unsigned long headerLength = 6; // This is only for testing purposes
+
+  unsigned long bitCount = 0;
 
   fseek(output, headerLength, SEEK_SET);
   int c;
   while ((c=getc(input))!=EOF) {
-    if (ftell(input) % changeInterval == 0) {
+    if (bitCount % (changeInterval*8) == 0) {
+      printf("MODEL SWITCH\n");
       int modelCode = CP_GetBestModel(p)->code;
       Model *m = malloc(sizeof(*m));
       MO_New(m, modelCode);
@@ -58,11 +62,12 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
       if (headerLength > ftell(output)) {
         fseek(output, headerLength, SEEK_SET);
       }
-      printf("%ld %ld %d\n", ftell(output), ftell(input), modelCode);
+
+      bitCount = 0;
     }
-    /*encode(p, &x1, &x2, 0, output, CP_Predict(p), changeInterval, code);*/
     for (int i=7; i>=0; --i) {
       encode(p, &x1, &x2, (c>>i)&1, output, input, CP_Predict(p), changeInterval);
+      bitCount += 1;
     }
   }
   encode(p, &x1, &x2, 1, output, input, CP_Predict(p), changeInterval);  // EOF code

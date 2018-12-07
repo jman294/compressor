@@ -29,6 +29,7 @@ int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, 
     if (c==EOF) c=0;
     (*x)=((*x)<<8)+c;
   }
+  printf("%d %d\n", y, p->currentModel->code);
   return y;
 }
 
@@ -53,14 +54,15 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   int startingCode;
   unsigned long headerLength;
   readHeaderInit(input, &startingCode, &headerLength);
-  uint8_t modelSwitches[1] = {1};
+  uint8_t modelSwitches[4] = {0, 1, 1, 1};
   /*memset(modelSwitches, 0, (headerLength-2)*sizeof(uint8_t));*/
   /*readHeaderData(input, &modelSwitches, headerLength);*/
-  /*printf("%d %d\n", headerLength, modelSwitches[0]);*/
 
   Model *m = malloc(sizeof(*m));
   MO_New(m, startingCode);
   DP_SelectModel(p, m);
+
+  unsigned long bitCount = 0;
 
   // Reads in first 4 bytes into x
   fseek(input, headerLength, SEEK_SET);
@@ -73,27 +75,29 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   int changeInterval = 128; // Has to be synced with compressor's change interval
   int headerPos = 0;
 
-  while (!decode(p, &x1, &x2, &x, DP_Predict(p), input, output, changeInterval)) {
+  int run = 1;
+  while (run) {
+    if (bitCount % (changeInterval * 8) == 0) {
+      printf("MODEL SWITCH\n");
+      int modelCode = modelSwitches[headerPos];
+      headerPos += 1;
+
+      Model *m = malloc(sizeof(*m));
+      MO_New(m, modelCode);
+      DP_SelectModel(p, m);
+
+      bitCount = 0;
+    }
+    run = !decode(p, &x1, &x2, &x, DP_Predict(p), input, output, changeInterval);
     int c=1;
     // Decode until you reach a byte
     while (c<128) {
       c+=c+decode(p, &x1, &x2, &x, DP_Predict(p), input, output, changeInterval);
+      bitCount += 1;
     }
+    bitCount += 1;
     // c started at 1. You have to remove it from the output because it was not 0, and the 1 sticks to the front of the decoded byte. Hence the subtraction.
     putc(c-128, output);
-    unsigned long currentPos = ftell(input);
-    /*printf("%ld\n", currentPos);*/
-    if (ftell(output) % 128 == 0) {
-      /*fseek(input, headerPos, SEEK_SET);*/
-      int modelCode = modelSwitches[headerPos];
-      headerPos += 1;
-      /*fseek(input, currentPos+1, SEEK_SET);*/
-
-      /*printf("%ld %ld %d\n", ftell(input), ftell(output), modelCode);*/
-      Model *m = malloc(sizeof(*m));
-      MO_New(m, modelCode);
-      DP_SelectModel(p, m);
-    }
   }
   printf("donzo\n");
 
