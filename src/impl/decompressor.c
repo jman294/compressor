@@ -29,7 +29,6 @@ int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, 
     if (c==EOF) c=0;
     (*x)=((*x)<<8)+c;
   }
-  printf("%d %d\n", y, p->currentModel->code);
   return y;
 }
 
@@ -55,6 +54,8 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   unsigned long headerLength;
   readHeaderInit(input, &startingCode, &headerLength);
   uint8_t modelSwitches[4] = {0, 1, 1, 1};
+  FILE *header = fdopen (dup (fileno (input)), "rb");
+
   /*memset(modelSwitches, 0, (headerLength-2)*sizeof(uint8_t));*/
   /*readHeaderData(input, &modelSwitches, headerLength);*/
 
@@ -75,11 +76,12 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   int changeInterval = 128; // Has to be synced with compressor's change interval
   int headerPos = 0;
 
+  fseek(header, 2, SEEK_SET);
   int run = 1;
   while (run) {
     if (bitCount % (changeInterval * 8) == 0) {
-      printf("MODEL SWITCH\n");
-      int modelCode = modelSwitches[headerPos];
+      int modelCode = getc(header);
+      printf("MODEL SWITCH %d %ld %ld\n", modelCode, ftell(input), ftell(header));
       headerPos += 1;
 
       Model *m = malloc(sizeof(*m));

@@ -42,7 +42,7 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   int changeInterval = 128;
 
   unsigned long headerPos = 2;
-  unsigned long headerLength = 6; // This is only for testing purposes
+  unsigned long headerLength = 72; // This is only for testing purposes
 
   unsigned long bitCount = 0;
 
