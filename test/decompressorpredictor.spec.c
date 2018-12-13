@@ -15,24 +15,30 @@ void test_new (void) {
 
 void test_select (void) {
   DecompressorPredictor *p = malloc(sizeof(*p));
-  DP_New(p, NULL, NUM_MODELS, 0);
-  Model * m = malloc(sizeof(*m));
-  MO_New(m, TEXT1);
-  DP_SelectModel(p, m);
-  TEST_CHECK(p->currentModel->code == m->code);
+  ModelArray_t mos = malloc(sizeof(mos));
+  S_MO_EnumerateAllModels(mos);
 
-  MO_New(m, TEXT2);
-  DP_SelectModel(p, m);
-  TEST_CHECK(p->currentModel->code == m->code);
+  DP_New(p, mos, NUM_MODELS, 0);
+  /*Model * m = malloc(sizeof(*m));*/
+  /*MO_New(m, TEXT1);*/
+  DP_SelectModel(p, TEXT1);
+  TEST_CHECK(p->currentModel->code == TEXT1);
+
+  /*MO_New(m, TEXT2);*/
+  DP_SelectModel(p, TEXT2);
+  TEST_CHECK(p->currentModel->code == TEXT2);
 }
 
 void test_predict (void) {
+  DecompressorPredictor *p = malloc(sizeof(*p));
+  ModelArray_t mos = malloc(sizeof(mos));
+  S_MO_EnumerateAllModels(mos);
   context ctx = 0;
+  DP_New(p, mos, NUM_MODELS, ctx);
+
   Model * m = malloc(sizeof(*m));
   MO_New(m, TEXT1);
-  DecompressorPredictor *p = malloc(sizeof(*p));
-  DP_New(p, NULL, NUM_MODELS, ctx);
-  DP_SelectModel(p, m);
+  DP_SelectModel(p, TEXT1);
 
   int prediction = DP_Predict(p);
   int mPrediction = MO_GetPrediction(m, ctx);

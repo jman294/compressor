@@ -37,9 +37,9 @@ void CP_UpdateCtx (CompressorPredictor * cp, int bit) {
   cp->ctx = (cp->ctx << 1) | bit;
 }
 
-void CP_SelectModel (CompressorPredictor * cp, Model * m) {
+void CP_SelectModel (CompressorPredictor * cp, int code) {
   cp->predictionCount = 0;
-  cp->currentModel = m;
+  cp->currentModel = (*cp->models)[code];
 }
 
 Model * CP_GetBestModel (CompressorPredictor * cp) {

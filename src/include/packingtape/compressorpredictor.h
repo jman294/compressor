@@ -21,7 +21,7 @@ void CP_Update (CompressorPredictor * cp, int bit);
 
 void CP_UpdateCtx (CompressorPredictor * cp, int bit);
 
-void CP_SelectModel (CompressorPredictor * cp, Model * m);
+void CP_SelectModel (CompressorPredictor * cp, int code);
 
 Model * CP_GetBestModel(CompressorPredictor * cp);
 

@@ -18,6 +18,6 @@ int DP_Predict (DecompressorPredictor * dp);
 
 void DP_Update (DecompressorPredictor * dp, int bit);
 
-void DP_SelectModel (DecompressorPredictor * dp, Model * m);
+void DP_SelectModel (DecompressorPredictor * dp, int code);
 
 #endif // DECOMPRESSORPREDICTOR_H_

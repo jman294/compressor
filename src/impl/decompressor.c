@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #include "util.h"
 #include "modelenum.h"
@@ -38,14 +39,6 @@ void readHeaderInit (FILE* input, int * startingCode, unsigned long * headerLeng
   *headerLength = (int)getc(input);
 }
 
-void readHeaderData (FILE* input, uint8_t * dataArray[], unsigned long length) {
-  fseek(input, 2, SEEK_SET);
-  for (int i = 0; i < length - 2; i++) {
-    uint8_t byte = getc(input);
-    (*dataArray)[i] = byte;
-  }
-}
-
 void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   uint32_t x1 = 0;
   uint32_t x2 = 0xffffffff;
@@ -54,15 +47,9 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   int startingCode;
   unsigned long headerLength;
   readHeaderInit(input, &startingCode, &headerLength);
-  uint8_t modelSwitches[4] = {0, 1, 1, 1};
-  FILE *header = fdopen (dup (fileno (input)), "rb");
+  FILE *header = fdopen(dup(fileno(input)), "rb");
 
-  /*memset(modelSwitches, 0, (headerLength-2)*sizeof(uint8_t));*/
-  /*readHeaderData(input, &modelSwitches, headerLength);*/
-
-  Model *m = malloc(sizeof(*m));
-  MO_New(m, startingCode);
-  DP_SelectModel(p, m);
+  DP_SelectModel(p, startingCode);
 
   unsigned long bitCount = 8;
 
@@ -75,18 +62,14 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   }
 
   int changeInterval = 128; // Has to be synced with compressor's change interval
-  int headerPos = 0;
 
   fseek(header, 2, SEEK_SET);
   int run = 1;
   while (run) {
     if (bitCount % (changeInterval * 8) == 0) {
         int modelCode = getc(header);
-        headerPos += 1;
 
-        Model *m = malloc(sizeof(*m));
-        MO_New(m, modelCode);
-        DP_SelectModel(p, m);
+        DP_SelectModel(p, modelCode);
 
         bitCount = 0;
     }

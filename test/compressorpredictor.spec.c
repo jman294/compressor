@@ -42,12 +42,15 @@ void test_update (void) {
 }
 
 void test_predict (void) {
+  ModelArray_t mos = malloc(sizeof(mos));
+  S_MO_EnumerateAllModels(mos);
+
   context ctx = 0;
   Model * m = malloc(sizeof(*m));
   MO_New(m, TEXT1);
   CompressorPredictor *p = malloc(sizeof(*p));
-  CP_New(p, NULL, NUM_MODELS, ctx);
-  CP_SelectModel(p, m);
+  CP_New(p, mos, NUM_MODELS, ctx);
+  CP_SelectModel(p, TEXT1);
 
   int prediction = CP_Predict(p);
   int mPrediction = MO_GetPrediction(m, ctx);
@@ -57,17 +60,18 @@ void test_predict (void) {
 }
 
 void test_select_model (void) {
+  ModelArray_t mos = malloc(sizeof(mos));
+  S_MO_EnumerateAllModels(mos);
+
   CompressorPredictor *p = malloc(sizeof(*p));
-  CP_New(p, NULL, 0, 0);
+  CP_New(p, mos, 0, 0);
   Model * m = malloc(sizeof(*m));
   MO_New(m, TEXT1);
 
-  CP_SelectModel(p, m);
+  CP_SelectModel(p, TEXT1);
   TEST_CHECK(p->currentModel->code == TEXT1);
 
-  m = malloc(sizeof(*m));
-  MO_New(m, TEXT2);
-  CP_SelectModel(p, m);
+  CP_SelectModel(p, TEXT2);
   TEST_CHECK(p->currentModel->code == TEXT2);
 }
 
@@ -88,7 +92,7 @@ void test_integrate (void) {
   S_MO_EnumerateAllModels(mos);
   CP_New(cp, mos, NUM_MODELS, 0x6267);
 
-  CP_SelectModel(cp, (*cp->models)[0]);
+  CP_SelectModel(cp, (*cp->models)[0]->code);
   TEST_CHECK(cp->currentModel == (*mos)[0]);
   TEST_CHECK(cp->currentModel == (*cp->models)[0]);
 

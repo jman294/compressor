@@ -37,7 +37,7 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   int startingCode = p->currentModel->code;
   Model *m = malloc(sizeof(*m));
   MO_New(m, startingCode);
-  CP_SelectModel(p, m);
+  CP_SelectModel(p, startingCode);
   uint32_t x1 = 0;
   uint32_t x2 = 0xffffffff;
 
@@ -57,7 +57,7 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
       int modelCode = CP_GetBestModel(p)->code;
       Model *m = malloc(sizeof(*m));
       MO_New(m, modelCode);
-      CP_SelectModel(p, m);
+      CP_SelectModel(p, modelCode);
       fseek(output, headerPos, SEEK_SET);
       putc(modelCode, output);
       headerPos += 1;
