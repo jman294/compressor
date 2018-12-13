@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "util.h"
 #include "modelenum.h"
@@ -63,7 +64,7 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   MO_New(m, startingCode);
   DP_SelectModel(p, m);
 
-  unsigned long bitCount = 0;
+  unsigned long bitCount = 8;
 
   // Reads in first 4 bytes into x
   fseek(input, headerLength, SEEK_SET);
@@ -80,17 +81,19 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   int run = 1;
   while (run) {
     if (bitCount % (changeInterval * 8) == 0) {
-      int modelCode = getc(header);
-      printf("MODEL SWITCH %d %ld %ld\n", modelCode, ftell(input), ftell(header));
-      headerPos += 1;
+        int modelCode = getc(header);
+        headerPos += 1;
 
-      Model *m = malloc(sizeof(*m));
-      MO_New(m, modelCode);
-      DP_SelectModel(p, m);
+        Model *m = malloc(sizeof(*m));
+        MO_New(m, modelCode);
+        DP_SelectModel(p, m);
 
-      bitCount = 0;
+        bitCount = 0;
     }
     run = !decode(p, &x1, &x2, &x, DP_Predict(p), input, output, changeInterval);
+    if (!run) {
+      break;
+    }
     int c=1;
     // Decode until you reach a byte
     while (c<128) {
@@ -101,7 +104,6 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
     // c started at 1. You have to remove it from the output because it was not 0, and the 1 sticks to the front of the decoded byte. Hence the subtraction.
     putc(c-128, output);
   }
-  printf("donzo\n");
 
   fclose(input);
   fclose(output);
