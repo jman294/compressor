@@ -27,36 +27,35 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   }
 }
 
-void writeHeader (FILE* archive, int startingCode, unsigned long headerLength) {
+void writeHeader (FILE* archive, int startingCode, uint32_t headerLength) {
   rewind(archive);
+  putc(headerLength & 0x000000ff, archive);
+  putc(headerLength & 0x0000ff00, archive);
+  putc(headerLength & 0x00ff0000, archive);
+  putc(headerLength & 0xff000000, archive);
   putc(startingCode, archive);
-  putc(headerLength, archive);
 }
 
 void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   int startingCode = p->currentModel->code;
-  Model *m = malloc(sizeof(*m));
-  MO_New(m, startingCode);
   CP_SelectModel(p, startingCode);
   uint32_t x1 = 0;
   uint32_t x2 = 0xffffffff;
 
   int changeInterval = 128;
 
-  unsigned long headerPos = 2;
+  uint32_t headerPos = 5;
   fseek(input, 0, SEEK_END);
-  unsigned long headerLength = ftell(input)/changeInterval + headerPos; // This is only for testing purposes
+  uint32_t headerLength = ftell(input)/changeInterval + headerPos; // This is only for testing purposes
   fseek(input, 0, SEEK_SET);
 
-  unsigned long bitCount = 8;
+  uint32_t bitCount = 8;
 
-  fseek(output, headerLength, SEEK_SET);
+  fseek(output, headerPos, SEEK_SET);
   int c;
   while ((c=getc(input))!=EOF) {
     if (bitCount % (changeInterval*8) == 0) {
       int modelCode = CP_GetBestModel(p)->code;
-      Model *m = malloc(sizeof(*m));
-      MO_New(m, modelCode);
       CP_SelectModel(p, modelCode);
       fseek(output, headerPos, SEEK_SET);
       putc(modelCode, output);
