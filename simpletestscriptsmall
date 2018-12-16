@@ -1,0 +1,6 @@
+#!/bin/bash
+cd build
+./packingtape c build.ninja ../output/build.ninja.pt
+./packingtape d ../output/build.ninja.pt ../output/build.ninja
+sha1sum build.ninja
+sha1sum ../output/build.ninja
