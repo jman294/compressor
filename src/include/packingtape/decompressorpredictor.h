@@ -8,8 +8,6 @@ typedef struct DecompressorPredictor {
   int modelCount;
   ModelArray_t models;
   Model * currentModel;
-
-  int predictionCount;
 } DecompressorPredictor;
 
 void DP_New (DecompressorPredictor * dp, ModelArray_t mos, int modelCount, context ctx);

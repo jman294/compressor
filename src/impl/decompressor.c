@@ -22,7 +22,7 @@ int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, 
   else
     (*x1)=xmid+1;
   DP_Update(p, y);
-  printf("%d %d\n", y, p->currentModel->code);
+  printf("%d %d\n", y, prediction);
 
   // Shift equal MSB's out
   while ((((*x1)^(*x2))&0xff000000)==0) {
@@ -56,7 +56,7 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   FILE *header = fdopen(dup(fileno(input)), "rb");
 
   DP_SelectModel(p, startingCode);
-  printf("%lx %d\n", headerLength, startingCode);
+  /*printf("%lx %d\n", headerLength, startingCode);*/
 
   uint32_t bitCount = 8;
 
