@@ -18,7 +18,8 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   else
     *x1=xmid+1;
   CP_Update(p, y);
-  printf("%d %d\n", y, p->currentModel->code);
+  /*printf("%d %d\n", y, p->currentModel->code);*/
+  printf("%d %d\n", y, prediction);
 
   // Shift equal MSB's out
   while (((*x1^*x2)&0xff000000)==0) {
@@ -48,7 +49,8 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
 
   uint32_t headerPos = 5;
   fseek(input, 0, SEEK_END);
-  uint32_t headerLength = ftell(input)/changeInterval + headerPos; // This is only for testing purposes
+  uint32_t headerLength = ftell(input)/changeInterval + headerPos;
+  printf("%ld\n", headerLength);
   fseek(input, 0, SEEK_SET);
 
   uint32_t bitCount = 8;
@@ -61,8 +63,7 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
       CP_SelectModel(p, modelCode);
       fseek(output, headerPos, SEEK_SET);
       putc(modelCode, output);
-      printf("MODEL %d %lx\n", modelCode, ftell(output));
-      headerPos += 1;
+      /*printf("MODEL %d %lx\n", modelCode, ftell(output));*/
       fseek(output, 0, SEEK_END);
       if (headerLength > ftell(output)) {
         fseek(output, headerLength, SEEK_SET);
@@ -81,6 +82,4 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
 
   fclose(output);
   fclose(input);
-
-  printf("%ld\n", headerPos);
 }

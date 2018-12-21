@@ -96,13 +96,15 @@ subrange.  Output leading bytes of the range as they become known. */
 inline void Encoder::encode(int y) {
 
   // Update the range
-  const U32 xmid = x1 + ((x2-x1) >> 12) * predictor.p();
+  int prediction = predictor.p();
+  const U32 xmid = x1 + ((x2-x1) >> 12) * prediction;
   assert(xmid >= x1 && xmid < x2);
   if (y)
     x2=xmid;
   else
     x1=xmid+1;
   predictor.update(y);
+  printf("%d %d\n", y, prediction);
 
   // Shift equal MSB's out
   while (((x1^x2)&0xff000000)==0) {
