@@ -9,6 +9,8 @@
 #include "util.h"
 #include "modelenum.h"
 
+ModelData_t TEXT2_Data_Revised = TEXT2_Data_d;
+
 void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* archive, FILE* input, int prediction, short changeInterval) {
   // Update the range
   const uint32_t xmid = *x1 + ((*x2-*x1) >> 12) * prediction;
@@ -18,6 +20,15 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   else
     *x1=xmid+1;
   CP_Update(p, y);
+  if (y == 1 && p->currentModel->code == TEXT2) {
+    if (TEXT2_Data_Revised[p->ctx] < 4090) {
+      TEXT2_Data_Revised[p->ctx] += 5;
+    }
+  } else if (y == 0 && p->currentModel->code == TEXT2) {
+    if (TEXT2_Data_Revised[p->ctx] > 4) {
+      TEXT2_Data_Revised[p->ctx] -= 5;
+    }
+  }
   /*printf("%d %d\n", y, p->currentModel->code);*/
   printf("%d %d\n", y, prediction);
 
@@ -50,7 +61,7 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   uint32_t headerPos = 5;
   fseek(input, 0, SEEK_END);
   uint32_t headerLength = ftell(input)/changeInterval + headerPos;
-  printf("%ld\n", headerLength);
+  /*printf("%d\n", headerLength);*/
   fseek(input, 0, SEEK_SET);
 
   uint32_t bitCount = 8;
@@ -82,4 +93,11 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
 
   fclose(output);
   fclose(input);
+
+  /*for (int i = 0; i < NUM_CONTEXTS; i++) {*/
+    /*if (i % 12 == 0) {*/
+      /*printf("\\ \n");*/
+    /*}*/
+    /*printf("%d, ", TEXT2_Data_Revised[i]);*/
+  /*}*/
 }
