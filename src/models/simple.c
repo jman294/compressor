@@ -54,9 +54,9 @@ int main (int argc, char ** argv) {
     if (contextCount[i] != 0) {
       predictions[i] = (MODEL_LIMIT * oneCount[i]) / contextCount[i];
     }
-    printf("%d %d %d %d\n", i, oneCount[i], contextCount[i], predictions[i]);
+    /*printf("%d %d %d %d\n", i, oneCount[i], contextCount[i], predictions[i]);*/
   }
-  /*for (int i = 0; i < NUM_CONTEXTS; i++) {*/
-    /*printf("%d, ", predictions[i]);*/
-  /*}*/
+  for (int i = 0; i < NUM_CONTEXTS; i++) {
+    printf("%d, ", predictions[i]);
+  }
 }

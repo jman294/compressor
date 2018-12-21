@@ -18,7 +18,7 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   else
     *x1=xmid+1;
   CP_Update(p, y);
-  printf("%d %d\n", y, p->currentModel->code);
+  /*printf("%d %d\n", y, p->currentModel->code);*/
 
   // Shift equal MSB's out
   while (((*x1^*x2)&0xff000000)==0) {
@@ -31,10 +31,6 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
 void writeHeader (FILE* archive, int startingCode, uint32_t headerLength) {
   rewind(archive);
   fwrite(&headerLength, sizeof headerLength, 1, archive);
-  /*putc(headerLength & 0x000000ff, archive);*/
-  /*putc(headerLength & 0x0000ff00, archive);*/
-  /*putc(headerLength & 0x00ff0000, archive);*/
-  /*putc(headerLength & 0xff000000, archive);*/
   putc(startingCode, archive);
 }
 

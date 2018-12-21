@@ -22,7 +22,7 @@ int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, 
   else
     (*x1)=xmid+1;
   DP_Update(p, y);
-  printf("%d %d\n", y, p->currentModel->code);
+  /*printf("%d %d\n", y, p->currentModel->code);*/
 
   // Shift equal MSB's out
   while ((((*x1)^(*x2))&0xff000000)==0) {
@@ -37,10 +37,6 @@ int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, 
 
 void readHeaderInit (FILE* input, int * startingCode, uint32_t * headerLength) {
   fread(headerLength, sizeof(uint32_t), 1, input);
-  /**headerLength = *headerLength & getc(input);*/
-  /**headerLength = *headerLength & (getc(input) << 8);*/
-  /**headerLength = *headerLength & (getc(input) << 16);*/
-  /**headerLength = *headerLength & (getc(input) << 24);*/
   *startingCode = (int)getc(input);
 }
 
