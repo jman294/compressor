@@ -99,4 +99,5 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
 
   fclose(input);
   fclose(output);
+
 }

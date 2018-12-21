@@ -49,7 +49,6 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   uint32_t headerPos = 5;
   fseek(input, 0, SEEK_END);
   uint32_t headerLength = ftell(input)/changeInterval + headerPos; // This is only for testing purposes
-  printf("%ld\n", headerLength);
   fseek(input, 0, SEEK_SET);
 
   uint32_t bitCount = 8;

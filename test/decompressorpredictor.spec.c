@@ -19,12 +19,9 @@ void test_select (void) {
   S_MO_EnumerateAllModels(mos);
 
   DP_New(p, mos, NUM_MODELS, 0);
-  /*Model * m = malloc(sizeof(*m));*/
-  /*MO_New(m, TEXT1);*/
   DP_SelectModel(p, TEXT1);
   TEST_CHECK(p->currentModel->code == TEXT1);
 
-  /*MO_New(m, TEXT2);*/
   DP_SelectModel(p, TEXT2);
   TEST_CHECK(p->currentModel->code == TEXT2);
 }
