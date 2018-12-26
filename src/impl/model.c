@@ -36,6 +36,5 @@ void MO_SetData (Model * m, const ModelData_t * data) {
 }
 
 int MO_GetPrediction (Model * m, context context) {
-  /*printf("%d %d %d\n", m->code, context, (*m->data)[context]);*/
   return (*m->data)[context];
 }

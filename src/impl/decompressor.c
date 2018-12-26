@@ -10,7 +10,7 @@
 #include "decompressor.h"
 #include "decompressorpredictor.h"
 
-int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, int prediction, FILE* archive, FILE* output, short changeInterval) {
+int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, int prediction, FILE* archive, FILE* output, short changeInterval, uint32_t * bitCount) {
   // Update the range
   const uint32_t xmid = (*x1) + (((*x2)-(*x1)) >> 12) * prediction;
   assert(xmid >= (*x1) && xmid < (*x2));
@@ -22,7 +22,6 @@ int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, 
   else
     (*x1)=xmid+1;
   DP_Update(p, y);
-  /*printf("%d %d\n", y, p->currentModel->code);*/
 
   // Shift equal MSB's out
   while ((((*x1)^(*x2))&0xff000000)==0) {
@@ -52,7 +51,6 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   FILE *header = fdopen(dup(fileno(input)), "rb");
 
   DP_SelectModel(p, startingCode);
-  printf("%lx %d\n", headerLength, startingCode);
 
   uint32_t bitCount = 8;
 
@@ -65,27 +63,28 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   }
 
   int headerPos = 5;
-  int changeInterval = 128; // Has to be synced with compressor's change interval
+  int changeInterval = 1024; // Has to be synced with compressor's change interval
 
   fseek(header, headerPos, SEEK_SET);
   int run = 1;
   while (run) {
     if (bitCount % (changeInterval * 8) == 0) {
-        int modelCode = getc(header);
+      int modelCode = getc(header);
 
-        printf("MODEL %d %lx\n", modelCode, ftell(header));
-        DP_SelectModel(p, modelCode);
+      /*DP_SelectModel(p, modelCode);*/
+      DP_SelectModel(p, 1);
 
-        bitCount = 0;
+      bitCount = 0;
+      printf("%d\n", p->currentModel->code);
     }
-    run = !decode(p, &x1, &x2, &x, DP_Predict(p), input, output, changeInterval);
+    run = !decode(p, &x1, &x2, &x, DP_Predict(p), input, output, changeInterval, &bitCount);
     if (!run) {
       break;
     }
     int c=1;
     // Decode until you reach a byte
     while (c<128) {
-      c+=c+decode(p, &x1, &x2, &x, DP_Predict(p), input, output, changeInterval);
+      c+=c+decode(p, &x1, &x2, &x, DP_Predict(p), input, output, changeInterval, &bitCount);
       bitCount += 1;
     }
     bitCount += 1;

@@ -18,7 +18,7 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   else
     *x1=xmid+1;
   CP_Update(p, y);
-  /*printf("%d %d\n", y, p->currentModel->code);*/
+  /*printf("%d %d %d\n", y, p->currentModel->code, prediction);*/
 
   // Shift equal MSB's out
   while (((*x1^*x2)&0xff000000)==0) {
@@ -40,12 +40,11 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   uint32_t x1 = 0;
   uint32_t x2 = 0xffffffff;
 
-  int changeInterval = 128;
+  int changeInterval = 1024;
 
   uint32_t headerPos = 5;
   fseek(input, 0, SEEK_END);
   uint32_t headerLength = ftell(input)/changeInterval + headerPos; // This is only for testing purposes
-  printf("%ld\n", headerLength);
   fseek(input, 0, SEEK_SET);
 
   uint32_t bitCount = 8;
@@ -53,12 +52,12 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   fseek(output, headerLength, SEEK_SET);
   int c;
   while ((c=getc(input))!=EOF) {
-    if (bitCount % (changeInterval*8) == 0) {
-      int modelCode = CP_GetBestModel(p)->code;
+    if (bitCount % (changeInterval * 8) == 0) {
+      /*int modelCode = CP_GetBestModel(p)->code;*/
+      int modelCode = 0;
       CP_SelectModel(p, modelCode);
       fseek(output, headerPos, SEEK_SET);
       putc(modelCode, output);
-      printf("MODEL %d %lx\n", modelCode, ftell(output));
       headerPos += 1;
       fseek(output, 0, SEEK_END);
       if (headerLength > ftell(output)) {
@@ -74,10 +73,11 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   encode(p, &x1, &x2, 1, output, input, CP_Predict(p), changeInterval);  // EOF code
   flush(&x1, &x2, output);
 
+  printf("Compression level: %f%%\n", (((float) ftell(input))-((float) ftell(output)))/ftell(input)*100);
+
   writeHeader(output, startingCode, headerLength); // Can be picked intelligently
 
   fclose(output);
   fclose(input);
 
-  printf("%ld\n", headerPos);
 }
