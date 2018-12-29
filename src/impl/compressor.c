@@ -53,8 +53,8 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   int c;
   while ((c=getc(input))!=EOF) {
     if (bitCount % (changeInterval * 8) == 0) {
-      int modelCode = CP_GetBestModel(p)->code;
-      /*int modelCode = 0;*/
+      /*int modelCode = CP_GetBestModel(p)->code;*/
+      int modelCode = 0;
       CP_SelectModel(p, modelCode);
       fseek(output, headerPos, SEEK_SET);
       putc(modelCode, output);

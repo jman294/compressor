@@ -48,10 +48,11 @@ executable('packingtape', 'src/main.c', link_with: lib, include_directories: exe
 # Model Project
 model_sources = [
     'simple',
+    'sigmoid',
     ]
 
 foreach i: model_sources
-  executable(['models/' + i, 'src/models/' + i + '.c', headers], include_directories: lib_inc)
+  executable(['models/' + i, 'src/models/' + i + '.c', headers], include_directories: lib_inc, dependencies: m_dep)
 endforeach
 
 # Testing

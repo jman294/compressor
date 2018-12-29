@@ -71,8 +71,8 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
     if (bitCount % (changeInterval * 8) == 0) {
       int modelCode = getc(header);
 
-      /*DP_SelectModel(p, modelCode);*/
-      DP_SelectModel(p, 1);
+      DP_SelectModel(p, modelCode);
+      /*DP_SelectModel(p, 1);*/
 
       bitCount = 0;
       printf("%d\n", p->currentModel->code);
