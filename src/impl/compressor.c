@@ -18,7 +18,6 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   else
     *x1=xmid+1;
   CP_Update(p, y);
-  /*printf("%d %d %d\n", y, p->currentModel->code, prediction);*/
 
   // Shift equal MSB's out
   while (((*x1^*x2)&0xff000000)==0) {

@@ -26,7 +26,9 @@ int CP_Predict (CompressorPredictor * cp) {
 void CP_Update (CompressorPredictor * cp, int bit) {
   for (int i = 0; i < cp->modelCount; i++) {
     Model * currentModel = (*cp->models)[i];
-    currentModel->score = ((1.0 - fabs(bit - ((float)currentModel->lastPrediction/((float)MODEL_LIMIT))) * 0.55) + (.45 * currentModel->score))/2.0;
+    // If this is the first time scoring (models start at 0 score)
+    float pointScore = 1.0 - fabs(bit - ((float)currentModel->lastPrediction/((float)MODEL_LIMIT)));
+    currentModel->score = ((pointScore * 0.005) + (.995 * currentModel->score));
   }
   cp->ctx = (cp->ctx << 1) | bit;
 }
@@ -43,9 +45,11 @@ void CP_SelectModel (CompressorPredictor * cp, int code) {
 Model * CP_GetBestModel (CompressorPredictor * cp) {
   Model * bestScore = (*cp->models)[0];
   for (int i = 0; i < cp->modelCount; i++) {
+    printf("Model %d: %f\n", i, (*cp->models)[i]->score);
     if ((*cp->models)[i]->score > bestScore->score) {
       bestScore = (*cp->models)[i];
     }
   }
+  printf("-------\n");
   return bestScore;
 }
