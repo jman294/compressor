@@ -78,5 +78,4 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
 
   fclose(output);
   fclose(input);
-
 }
