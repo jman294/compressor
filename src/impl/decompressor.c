@@ -35,7 +35,7 @@ int decode (DecompressorPredictor * p, uint32_t* x1, uint32_t* x2, uint32_t* x, 
 }
 
 void readHeaderInit (FILE* input, int * startingCode, uint32_t * headerLength) {
-  fread(headerLength, sizeof(uint32_t), 1, input);
+  fread(headerLength, sizeof(headerLength), 1, input);
   *startingCode = (int)getc(input);
 }
 
@@ -63,19 +63,23 @@ void decompress (FILE* input, FILE* output, DecompressorPredictor* p) {
   }
 
   int headerPos = 5;
-  int changeInterval = 1024; // Has to be synced with compressor's change interval
+  int changeInterval = 128; // Has to be synced with compressor's change interval
 
   fseek(header, headerPos, SEEK_SET);
   int run = 1;
   while (run) {
     if (bitCount % (changeInterval * 8) == 0) {
-      int modelCode = getc(header);
+      /*int modelCode = getc(header);*/
+      long oldPos = ftell(input);
+      fseek(input, headerPos, SEEK_SET);
+      int modelCode = getc(input);
+      headerPos += 1;
+      fseek(input, oldPos, SEEK_SET);
 
-      /*DP_SelectModel(p, modelCode);*/
-      DP_SelectModel(p, 1);
+      DP_SelectModel(p, modelCode);
 
       bitCount = 0;
-      printf("%d\n", p->currentModel->code);
+      /*printf("%d\n", p->currentModel->code);*/
     }
     run = !decode(p, &x1, &x2, &x, DP_Predict(p), input, output, changeInterval, &bitCount);
     if (!run) {
