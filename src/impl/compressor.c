@@ -29,7 +29,7 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
 
 void writeHeader (FILE* archive, int startingCode, uint32_t headerLength) {
   rewind(archive);
-  fwrite(&headerLength, sizeof(headerLength), 1, archive);
+  fwrite(&headerLength, sizeof(uint32_t), 1, archive);
   putc(startingCode, archive);
 }
 
@@ -53,7 +53,7 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   while ((c=getc(input))!=EOF) {
     if (bitCount % (changeInterval * 8) == 0) {
       int modelCode = CP_GetBestModel(p)->code;
-      /*int modelCode = 0;*/
+      /*int modelCode = 1;*/
       CP_SelectModel(p, modelCode);
       fseek(output, headerPos, SEEK_SET);
       putc(modelCode, output);
