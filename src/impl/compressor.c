@@ -72,7 +72,6 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   encode(p, &x1, &x2, 1, output, input, CP_Predict(p), changeInterval);  // EOF code
   flush(&x1, &x2, output);
 
-  printf("%d\n", headerPos);
   printf("Compression level: %f%%\n", (((float) ftell(input))-((float) ftell(output)))/ftell(input)*100);
 
   writeHeader(output, startingCode, headerLength); // Can be picked intelligently
