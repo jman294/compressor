@@ -18,6 +18,7 @@ void encode (CompressorPredictor * p, uint32_t* x1, uint32_t* x2, int y, FILE* a
   else
     *x1=xmid+1;
   CP_Update(p, y);
+  /*printf("%d\n", prediction);*/
 
   // Shift equal MSB's out
   while (((*x1^*x2)&0xff000000)==0) {
@@ -45,6 +46,7 @@ void compress (FILE* input, FILE* output, CompressorPredictor* p) {
   fseek(input, 0, SEEK_END);
   uint32_t headerLength = ftell(input)/changeInterval + headerPos; // This is only for testing purposes
   fseek(input, 0, SEEK_SET);
+  printf("%d %d\n", startingCode, headerLength);
 
   uint32_t bitCount = 8;
 

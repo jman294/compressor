@@ -1,0 +1,276 @@
+/*
+Copyright (C) 2017 Felipe Ferreira da Silva
+
+This software is provided 'as-is', without any express or implied warranty. In
+no event will the authors be held liable for any damages arising from the use of
+this software.
+
+Permission is granted to anyone to use this software for any purpose, including
+commercial applications, and to alter it and redistribute it freely, subject to
+the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not claim
+     that you wrote the original software. If you use this software in a
+     product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
+
+#include <stddef.h>
+#include "uastar.h"
+
+#define PATH_FINDER_MASK_PASSABLE 0x01
+#define PATH_FINDER_MASK_OPEN 0x02
+#define PATH_FINDER_MASK_CLOSED 0x04
+#define PATH_FINDER_MASK_PATH 0x08
+
+static int32_t path_finder_heuristic(struct path_finder *path_finder, int32_t cell)
+{
+	int32_t cell_y;
+	int32_t cell_x;
+	int32_t end_y;
+	int32_t end_x;
+	int32_t dx;
+	int32_t dy;
+	cell_y = cell / path_finder->cols;
+	cell_x = cell - (cell_y * path_finder->cols);
+	end_y = path_finder->end / path_finder->cols;
+	end_x = path_finder->end - (end_y * path_finder->cols);
+	if (cell_x > end_x) {
+		dx = cell_x - end_x;
+	} else {
+		dx = end_x - cell_x;
+	}
+	if (cell_y > end_y) {
+		dy = cell_y - end_y;
+	} else {
+		dy = end_y - cell_y;
+	}
+	return dx + dy;
+}
+
+static uint8_t path_finder_open_set_is_empty(struct path_finder *path_finder)
+{
+	uint8_t empty;
+	int32_t i;
+	empty = 1;
+	i = 0;
+	while (i < path_finder->cols * path_finder->rows && empty == 1) {
+		if ((path_finder->state[i] & PATH_FINDER_MASK_OPEN) == PATH_FINDER_MASK_OPEN) {
+			empty = 0;
+		}
+		i = i + 1;
+	}
+	return empty;
+}
+
+static int32_t path_finder_lowest_in_open_set(struct path_finder *path_finder)
+{
+	int32_t lowest_f;
+	int32_t current_lowest;
+	int32_t count;
+	int32_t i;
+	count = path_finder->cols * path_finder->rows;
+	lowest_f = count;
+	current_lowest = 0;
+	i = 0;
+	while (i < count) {
+		if ((path_finder->state[i] & PATH_FINDER_MASK_OPEN) == PATH_FINDER_MASK_OPEN) {
+			if (path_finder->f_score[i] < lowest_f) {
+				lowest_f = path_finder->f_score[i];
+				current_lowest = i;
+			}
+		}
+		i = i + 1;
+	}
+	return current_lowest;
+}
+
+static void path_finder_reconstruct_path(struct path_finder *path_finder)
+{
+	int32_t i;
+	i = path_finder->end;
+	while (i != path_finder->start) {
+		if (path_finder->parents[i] != path_finder->start) {
+			path_finder->state[path_finder->parents[i]] = path_finder->state[path_finder->parents[i]] | PATH_FINDER_MASK_PATH;
+		}
+		i = path_finder->parents[i];
+	}
+}
+
+void path_finder_fill(struct path_finder *path_finder)
+{
+	int32_t row;
+	row = 0;
+	while (row < path_finder->rows) {
+		int32_t col;
+		col = 0;
+		while (col < path_finder->cols) {
+			if (path_finder->fill_func(path_finder, col, row) == 1) {
+				path_finder->state[row * path_finder->cols + col] = path_finder->state[row * path_finder->cols + col] | PATH_FINDER_MASK_PASSABLE;
+			} else {
+				path_finder->state[row * path_finder->cols + col] = path_finder->state[row * path_finder->cols + col] & ~PATH_FINDER_MASK_PASSABLE;
+			}
+			col = col + 1;
+		}
+		row = row + 1;
+	}
+}
+
+void path_finder_begin(struct path_finder *path_finder)
+{
+	path_finder->state[path_finder->start] = path_finder->state[path_finder->start] | PATH_FINDER_MASK_OPEN;
+}
+
+uint8_t path_finder_find_step(struct path_finder *path_finder, void *data)
+{
+	uint8_t run;
+	int32_t current;
+	int32_t count;
+	run = 1;
+	current = 0;
+	count = path_finder->cols * path_finder->rows;
+	current = path_finder_lowest_in_open_set(path_finder);
+	if (current == path_finder->end) {
+		path_finder_reconstruct_path(path_finder);
+		run = 0;
+		path_finder->has_path = 1;
+	} else if (path_finder_open_set_is_empty(path_finder) == 1) {
+		run = 0;
+		path_finder->has_path = 0;
+	} else {
+		int32_t neighbors[4];
+		int32_t j;
+		int32_t tmp_g_score;
+		path_finder->state[current] = path_finder->state[current] & ~PATH_FINDER_MASK_OPEN;
+		path_finder->state[current] = path_finder->state[current] | PATH_FINDER_MASK_CLOSED;
+		/* Left */
+		if (current % path_finder->cols == 0) {
+			neighbors[0] = -1;
+		} else {
+			neighbors[0] = current - 1;
+		}
+		/* Top */
+		neighbors[1] = current - path_finder->cols;
+		/* Right */
+		if ((current + 1) % path_finder->cols == 0) {
+			neighbors[2] = -1;
+		} else {
+			neighbors[2] = current + 1;
+		}
+		/* Bottom */
+		neighbors[3] = current + path_finder->cols;
+		/* Neighbors */
+		tmp_g_score = 0;
+		j = 0;
+		while (j < 4) {
+			int32_t n;
+			n = neighbors[j];
+			if (n > -1 && n < count && (path_finder->state[n] & PATH_FINDER_MASK_CLOSED) == 0) {
+				if ((path_finder->state[n] & PATH_FINDER_MASK_PASSABLE) == 0) {
+					path_finder->state[n] = path_finder->state[n] | PATH_FINDER_MASK_CLOSED;
+				} else {
+					tmp_g_score = path_finder->g_score[current] + 1;
+					if ((path_finder->state[n] & PATH_FINDER_MASK_OPEN) == 0 || tmp_g_score < path_finder->g_score[n]) {
+						path_finder->parents[n] = current;
+						path_finder->g_score[n] = tmp_g_score;
+						path_finder->f_score[n] = tmp_g_score + path_finder_heuristic(path_finder, n);
+						if (path_finder->score_func != NULL) {
+							path_finder->f_score[n] = path_finder->f_score[n] + path_finder->score_func(path_finder, n / path_finder->cols, n % path_finder->cols, data);
+						}
+						path_finder->state[n] = path_finder->state[n] | PATH_FINDER_MASK_OPEN;
+					}
+				}
+			}
+			j = j + 1;
+		}
+	}
+	return run;
+}
+
+void path_finder_find(struct path_finder *path_finder, void *data)
+{
+	path_finder_begin(path_finder);
+	while (path_finder_find_step(path_finder, data) == 1) {
+	}
+}
+
+int32_t path_finder_get_heuristic_score(struct path_finder *path_finder, int32_t col, int32_t row)
+{
+	return path_finder->f_score[row * path_finder->cols + col];
+}
+
+uint8_t path_finder_is_passable(struct path_finder *path_finder, int32_t col, int32_t row)
+{
+	return (path_finder->state[row * path_finder->cols + col] & PATH_FINDER_MASK_PASSABLE) == PATH_FINDER_MASK_PASSABLE;
+}
+
+uint8_t path_finder_is_closed(struct path_finder *path_finder, int32_t col, int32_t row)
+{
+	return (path_finder->state[row * path_finder->cols + col] & PATH_FINDER_MASK_CLOSED) == PATH_FINDER_MASK_CLOSED;
+}
+
+uint8_t path_finder_is_open(struct path_finder *path_finder, int32_t col, int32_t row)
+{
+	return (path_finder->state[row * path_finder->cols + col] & PATH_FINDER_MASK_OPEN) == PATH_FINDER_MASK_OPEN;
+}
+
+uint8_t path_finder_is_path(struct path_finder *path_finder, int32_t col, int32_t row)
+{
+	return (path_finder->state[row * path_finder->cols + col] & PATH_FINDER_MASK_PATH) == PATH_FINDER_MASK_PATH;
+}
+
+uint8_t path_finder_is_start(struct path_finder *path_finder, int32_t col, int32_t row)
+{
+	return row * path_finder->cols + col == path_finder->start;
+}
+
+uint8_t path_finder_is_end(struct path_finder *path_finder, int32_t col, int32_t row)
+{
+	return row * path_finder->cols + col == path_finder->end;
+}
+
+void path_finder_set_start(struct path_finder *path_finder, int32_t col, int32_t row)
+{
+	path_finder->start = row * path_finder->cols + col;
+}
+
+void path_finder_set_end(struct path_finder *path_finder, int32_t col, int32_t row)
+{
+	path_finder->end = row * path_finder->cols + col;
+}
+
+void path_finder_clear_path(struct path_finder *path_finder)
+{
+	int32_t i;
+	i = 0;
+	while (i < PATH_FINDER_MAX_CELLS) {
+		path_finder->state[i] = path_finder->state[i] & ~(PATH_FINDER_MASK_OPEN | PATH_FINDER_MASK_CLOSED | PATH_FINDER_MASK_PATH);
+		path_finder->parents[i] = 0;
+		path_finder->g_score[i] = 0;
+		path_finder->f_score[i] = 0;
+		i = i + 1;
+	}
+	path_finder->has_path = 0;
+}
+
+void path_finder_initialize(struct path_finder *path_finder)
+{
+	int32_t i;
+	i = 0;
+	while (i < PATH_FINDER_MAX_CELLS) {
+		path_finder->parents[i] = 0;
+		path_finder->g_score[i] = 0;
+		path_finder->f_score[i] = 0;
+		path_finder->state[i] = PATH_FINDER_MASK_PASSABLE;
+		i = i + 1;
+	}
+	path_finder->rows = 0;
+	path_finder->cols = 0;
+	path_finder->start = 0;
+	path_finder->end = 0;
+	path_finder->has_path = 0;
+}
+(function(global,factory){if(typeof define==="function"&&define.amd){define("FinnishBankUtils",["module"],factory)}else if(typeof exports!=="undefined"){factory(module)}else{var mod={exports:{}};factory(mod);global.FinnishBankUtils=mod.exports}})(this,function(module){"use strict";var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj};var _slicedToArray=function(){function sliceIterator(arr,i){var _arr=[];var _n=true;var _d=false;var _e=undefined;try{for(var _i=arr[Symbol.iterator](),_s;!(_n=(_s=_i.next()).done);_n=true){_arr.push(_s.value);if(i&&_arr.length===i)break}}catch(err){_d=true;_e=err}finally{try{if(!_n&&_i["return"])_i["return"]()}finally{if(_d)throw _e}}return _arr}return function(arr,i){if(Array.isArray(arr)){return arr}else if(Symbol.iterator in Object(arr)){return sliceIterator(arr,i)}else{throw new TypeError("Invalid attempt to destructure non-iterable instance")}}}();function _toConsumableArray(arr){if(Array.isArray(arr)){for(var i=0,arr2=Array(arr.length);i<arr.length;i++){arr2[i]=arr[i]}return arr2}else{return Array.from(arr)}}var REF_NUMBER_MULTIPLIERS=[7,3,1],FINNISH_REF_NUMBER_REGEX=/^(\d{4,20}|RF\d{6,22})$/i,FINNISH_IBAN_REGEX=/^FI\d{16}$/,FINNISH_VIRTUAL_BAR_CODE_REGEX=/^[45]\d{53}$/,FINNISH_DATE_REGEX=/^(\d\d?)\.(\d\d?)\.(\d{4})$/,IBAN_OFFSET_FROM_ASCIICODE=-55;function removeAllWhiteSpaces(str){return str.replace(/\s+/g,"")}function removeLeadingZeros(str){return str.replace(/^0+/,"")}function lettersToNumbers(str){return[].concat(_toConsumableArray(str)).map(function(char){if(/\D/.test(char)){return String(char.charCodeAt(0)+IBAN_OFFSET_FROM_ASCIICODE)}return char}).join("")}function reverseString(str){return[].concat(_toConsumableArray(str)).reverse().join("")}function removeStringFromEnd(str,strToRemove){if(str.substr(-strToRemove.length)===strToRemove){return str.substr(0,str.length-strToRemove.length)}return str}function leftPadString(str,char,pad){return(char.repeat(pad)+str).substr(-Math.max(str.length,pad))}function randomNumberWithLength(length){var randomNumber="";for(var i=0;i<length;i++){randomNumber+=Math.floor(Math.random()*9)+1}return parseInt(randomNumber,10)}function modForLargeNumber(base,divisor){var dividend="";for(var i=0;i<base.length;i++){dividend=parseInt(dividend+base[i],10);if(dividend>=divisor){var remainder=dividend%divisor;if(i==base.length-1){return remainder}else{dividend=remainder}}}return parseInt(dividend,10)}function luhnMod10(value){var sum=0;for(var i=0;i<value.length;i++){var multiplier=i%2===0?2:1;var add=multiplier*parseInt(value[i],10);if(add>=10){add-=9}sum+=add}var mod10=sum%10;return mod10===0?mod10:10-mod10}function isValidFinnishBBAN(accountNumber){accountNumber=removeAllWhiteSpaces(accountNumber);var localAccountNumberWithoutCheckSum=accountNumber.substr(4,13),luhnChecksumChar=parseInt(accountNumber.substr(17,1),10);return luhnMod10(localAccountNumberWithoutCheckSum)===luhnChecksumChar}function isValidIBAN(iban){iban=removeAllWhiteSpaces(iban.toUpperCase());var prefixAndChecksum=iban.substr(0,4),number=iban.substr(4);return modForLargeNumber(lettersToNumbers(number+prefixAndChecksum),97)===1}function isValidFinnishDate(string){if(!string||typeof string!="string"||!FINNISH_DATE_REGEX.test(string)){return false}var _string$match$slice$m=string.match(FINNISH_DATE_REGEX).slice(1,4).map(Number),_string$match$slice$m2=_slicedToArray(_string$match$slice$m,3),day=_string$match$slice$m2[0],month=_string$match$slice$m2[1],year=_string$match$slice$m2[2],date=new Date(year,month-1,day);return year==date.getFullYear()&&month-1==date.getMonth()&&day==date.getDate()}function sliceVirtualBarCode(barCode){var version=Number(barCode.substr(0,1));var slices=void 0;if(version===4){slices=[1,16,6,2,3,20,2,2,2]}else if(version===5){slices=[1,16,6,2,0,23,2,2,2]}var index=0;return slices.map(function(length){var slice=barCode.substr(index,length);index+=length;return slice})}var FinnishBankUtils={isValidFinnishRefNumber:function isValidFinnishRefNumber(refNumber){if(!refNumber||typeof refNumber!=="string"||!FINNISH_REF_NUMBER_REGEX.test(removeAllWhiteSpaces(refNumber.toUpperCase()))){return false}refNumber=removeAllWhiteSpaces(refNumber.toUpperCase());if(/^RF/.test(refNumber)){if(!isValidIBAN(refNumber)){return false}refNumber=refNumber.substr(4)}else{refNumber=removeLeadingZeros(refNumber)}var reversedRefNumber=reverseString(refNumber),providedChecksumNumber=parseInt(reversedRefNumber.charAt(0));refNumber=reversedRefNumber.substr(1);var checksum=0,checksumNumber=void 0;for(var i=0;i<refNumber.length;i++){checksum+=REF_NUMBER_MULTIPLIERS[i%REF_NUMBER_MULTIPLIERS.length]*parseInt(refNumber.charAt(i))}checksumNumber=10-checksum%10;if(checksumNumber===10){checksumNumber=0}return checksumNumber===providedChecksumNumber},isValidFinnishIBAN:function isValidFinnishIBAN(accountNumber){if(!accountNumber||typeof accountNumber!=="string"||!FINNISH_IBAN_REGEX.test(removeAllWhiteSpaces(accountNumber.toUpperCase()))){return false}return isValidFinnishBBAN(accountNumber)&&isValidIBAN(accountNumber)},formatFinnishRefNumber:function formatFinnishRefNumber(refNumber){var separator=arguments.length>1&&arguments[1]!==undefined?arguments[1]:" ";if(this.isValidFinnishRefNumber(refNumber)){refNumber=removeAllWhiteSpaces(refNumber.toUpperCase());if(/^RF/.test(refNumber)){refNumber=refNumber.substr(0,4)+removeLeadingZeros(refNumber.substr(4));return removeStringFromEnd(refNumber.replace(/.{4}/g,"$&"+separator),separator)}else{refNumber=removeLeadingZeros(refNumber);return reverseString(removeStringFromEnd(reverseString(refNumber).replace(/.{5}/g,"$&"+separator),separator))}}},formatFinnishIBAN:function formatFinnishIBAN(accountNumber){var separator=arguments.length>1&&arguments[1]!==undefined?arguments[1]:" ";if(this.isValidFinnishIBAN(accountNumber)){accountNumber=removeAllWhiteSpaces(accountNumber.toUpperCase());return removeStringFromEnd(accountNumber.replace(/.{4}/g,"$&"+separator),separator)}},generateFinnishRefNumber:function generateFinnishRefNumber(initial){var refNumber=typeof initial==="string"?removeAllWhiteSpaces(initial):randomNumberWithLength(9).toString(),reversedRefNumber=reverseString(refNumber);var checksum=0,checksumNumber=void 0;for(var i=0;i<reversedRefNumber.length;i++){checksum+=REF_NUMBER_MULTIPLIERS[i%REF_NUMBER_MULTIPLIERS.length]*parseInt(reversedRefNumber.charAt(i))}checksumNumber=10-checksum%10;if(checksumNumber===10){checksumNumber=0}return refNumber+checksumNumber},generateFinnishIBAN:function generateFinnishIBAN(){var defaultCheckDigit="00",danskeBankOffice="800026",countryCodeInDigits=lettersToNumbers("FI"),bankAccount=randomNumberWithLength(7),localAccountNumber=danskeBankOffice+bankAccount+luhnMod10(danskeBankOffice+bankAccount),accountNumberCandidate=localAccountNumber+countryCodeInDigits+defaultCheckDigit,checkDigit=98-modForLargeNumber(accountNumberCandidate,97),checkChars=checkDigit>=10?checkDigit.toString():"0"+checkDigit;return"FI"+checkChars+localAccountNumber},parseFinnishVirtualBarCode:function parseFinnishVirtualBarCode(barCode){if(!barCode||typeof barCode!="string"||!FINNISH_VIRTUAL_BAR_CODE_REGEX.test(barCode)){return false}var _sliceVirtualBarCode=sliceVirtualBarCode(barCode),_sliceVirtualBarCode2=_slicedToArray(_sliceVirtualBarCode,9),version=_sliceVirtualBarCode2[0],iban=_sliceVirtualBarCode2[1],euros=_sliceVirtualBarCode2[2],cents=_sliceVirtualBarCode2[3],reserve=_sliceVirtualBarCode2[4],reference=_sliceVirtualBarCode2[5],year=_sliceVirtualBarCode2[6],month=_sliceVirtualBarCode2[7],day=_sliceVirtualBarCode2[8];version=Number(version);iban=this.formatFinnishIBAN("FI"+iban);var sum=Number(euros)+Number(cents)/100;if(version===5){reference="RF"+reference.substr(0,2)+removeLeadingZeros(reference.substr(2))}reference=this.formatFinnishRefNumber(reference);var date=void 0;day=Number(day);month=Number(month);if(day>0&&month>0){date=day+"."+month+".20"+year}return{iban:iban,sum:sum,reference:reference,date:date}},formatFinnishVirtualBarCode:function formatFinnishVirtualBarCode(object){if(!object||(typeof object==="undefined"?"undefined":_typeof(object))!="object"||!this.isValidFinnishIBAN(object.iban)||typeof object.sum!="number"||object.sum<0||object.sum>999999.99||object.sum!=Number(object.sum.toFixed(2))||!this.isValidFinnishRefNumber(object.reference)||object.date!=undefined&&!isValidFinnishDate(object.date)){return false}var iban=removeAllWhiteSpaces(object.iban),euros=Math.floor(object.sum),cents=Math.floor(object.sum*100-euros*100),reference=removeAllWhiteSpaces(object.reference),day=0,month=0,year=0,version=/^RF/.test(reference)?5:4;if(object.date){var _object$date$match$sl=object.date.match(FINNISH_DATE_REGEX).slice(1,4).map(Number);var _object$date$match$sl2=_slicedToArray(_object$date$match$sl,3);day=_object$date$match$sl2[0];month=_object$date$match$sl2[1];year=_object$date$match$sl2[2]}if(version==5){reference=reference.replace(/^RF/,"");reference=reference.substr(0,2)+leftPadString(reference.substr(2),"0",21)}return String(version)+iban.replace(/^FI/,"")+leftPadString(String(euros),"0",6)+leftPadString(String(cents),"0",2)+leftPadString(reference,"0",23)+leftPadString(String(year).substr(-2),"0",2)+leftPadString(String(month),"0",2)+leftPadString(String(day),"0",2)}};module.exports=Object.freeze(FinnishBankUtils)});
